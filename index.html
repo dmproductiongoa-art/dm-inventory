@@ -22,19 +22,50 @@
     const INITIAL_INVENTORY = [
       { 
         id: 'INV-1001', 
-        name: 'Staging Angle Ply (8x4 ft)', 
+        name: 'Angle Ply (8x4 ft)', 
         category: 'Staging & Trusses', 
         total: 100, out: 15, maintenance: 2, 
         image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80', 
         unit: 'Pcs',
         rackLocation: 'Zone A - Rack 04',
-        serialNo: 'DM-STG-2024-01',
-        purchaseCost: 4500,
-        condition: 'Good',
-        description: 'Heavy duty waterproof marine plywood staging deck with steel borders.'
+        serialNo: 'DM-STG-8x4-01',
+        description: 'Heavy duty waterproof marine plywood staging deck (8x4 ft) with steel borders.'
       },
       { 
         id: 'INV-1002', 
+        name: 'Angle Ply (6x4 ft)', 
+        category: 'Staging & Trusses', 
+        total: 80, out: 10, maintenance: 0, 
+        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Pcs',
+        rackLocation: 'Zone A - Rack 05',
+        serialNo: 'DM-STG-6x4-02',
+        description: 'Medium waterproof marine plywood staging deck (6x4 ft) with steel borders.'
+      },
+      { 
+        id: 'INV-1003', 
+        name: 'Gold Mirror Island Bar', 
+        category: 'Bar Structures', 
+        total: 6, out: 2, maintenance: 0, 
+        image: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Units',
+        rackLocation: 'Zone B - Bay 01',
+        serialNo: 'DM-BAR-MIR-01',
+        description: 'Premium acrylic gold mirror finished island bar setup.'
+      },
+      { 
+        id: 'INV-1004', 
+        name: 'Vintage Wooden Bar', 
+        category: 'Bar Structures', 
+        total: 4, out: 1, maintenance: 1, 
+        image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Units',
+        rackLocation: 'Zone B - Bay 02',
+        serialNo: 'DM-BAR-VNT-02',
+        description: 'Handcrafted rustic solid wood bar structure with warm LED accents.'
+      },
+      { 
+        id: 'INV-1005', 
         name: 'Aluminum Box Truss (10ft)', 
         category: 'Staging & Trusses', 
         total: 40, out: 12, maintenance: 1, 
@@ -42,12 +73,10 @@
         unit: 'Pcs',
         rackLocation: 'Zone A - Rack 12',
         serialNo: 'DM-TRS-1099',
-        purchaseCost: 12000,
-        condition: 'Excellent',
         description: '300x300mm aluminum square box truss with spigot connectors.'
       },
       { 
-        id: 'INV-1003', 
+        id: 'INV-1006', 
         name: 'Royal Velvet Drapes (Maroon)', 
         category: 'Fabrics & Drapes', 
         total: 60, out: 20, maintenance: 0, 
@@ -55,22 +84,7 @@
         unit: 'Rolls',
         rackLocation: 'Fabric Vault B',
         serialNo: 'DM-DRP-8821',
-        purchaseCost: 2800,
-        condition: 'Fair',
         description: '300 GSM fire-retardant rich velvet fabric for main stage backdrops.'
-      },
-      { 
-        id: 'INV-1004', 
-        name: 'Brass Mandap Pillars', 
-        category: 'Wedding Decor & Props', 
-        total: 16, out: 8, maintenance: 0, 
-        image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&auto=format&fit=crop&q=80', 
-        unit: 'Sets',
-        rackLocation: 'Zone C - Display Bay',
-        serialNo: 'DM-MDP-004',
-        purchaseCost: 35000,
-        condition: 'Excellent',
-        description: 'Handcrafted antique finished solid brass carved pillars (8ft height).'
       }
     ];
 
@@ -81,7 +95,7 @@
     ];
 
     const INITIAL_PROJECTS = [
-      { id: 'PRJ-501', clientName: 'Singhania Wedding', location: 'Grand Hyatt Lawn', eventDate: '2026-10-15', status: 'In Progress', allocatedItems: [{ itemId: 'INV-1001', qty: 10 }, { itemId: 'INV-1004', qty: 4 }] },
+      { id: 'PRJ-501', clientName: 'Singhania Wedding', location: 'Grand Hyatt Lawn', eventDate: '2026-10-15', status: 'In Progress', allocatedItems: [] },
       { id: 'PRJ-502', clientName: 'Tech Summit 2026', location: 'Exhibition Center - Hall 3', eventDate: '2026-11-02', status: 'Upcoming', allocatedItems: [] }
     ];
 
@@ -91,44 +105,43 @@
       const [loginRole, setLoginRole] = useState('owner');
       const [pinInput, setPinInput] = useState('');
 
-      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v4')) || DEFAULT_PINS);
-      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v4') || null);
+      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v5')) || DEFAULT_PINS);
+      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v5') || null);
       
       const [activeTab, setActiveTab] = useState('dashboard');
-      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v4')) || INITIAL_INVENTORY);
-      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v4')) || INITIAL_WORKERS);
-      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v4')) || INITIAL_PROJECTS);
-      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v4')) || []);
+      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v5')) || INITIAL_INVENTORY);
+      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v5')) || INITIAL_WORKERS);
+      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v5')) || INITIAL_PROJECTS);
+      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v5')) || []);
 
       // Filter States
       const [selectedCategory, setSelectedCategory] = useState('All');
       const [searchTerm, setSearchTerm] = useState('');
+      const [dashSearchTerm, setDashSearchTerm] = useState('');
       
       // Modals / Item Editing
       const [editingItem, setEditingItem] = useState(null);
-      const [viewingDetailItem, setViewingDetailItem] = useState(null);
       const [selectedProjectForDispatch, setSelectedProjectForDispatch] = useState(projects[0]?.id || '');
       
       const [newItem, setNewItem] = useState({
         name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs',
-        rackLocation: '', serialNo: '', purchaseCost: '', condition: 'Good', description: '', image: ''
+        rackLocation: '', serialNo: '', description: '', image: ''
       });
 
       const [newWorker, setNewWorker] = useState({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800, phone: '', activeSite: 'None' });
       const [newProject, setNewProject] = useState({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
 
       // Synchronize LocalStorage
-      useEffect(() => { localStorage.setItem('dm_inventory_v4', JSON.stringify(inventory)); }, [inventory]);
-      useEffect(() => { localStorage.setItem('dm_workers_v4', JSON.stringify(workers)); }, [workers]);
-      useEffect(() => { localStorage.setItem('dm_projects_v4', JSON.stringify(projects)); }, [projects]);
-      useEffect(() => { localStorage.setItem('dm_logs_v4', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
-      useEffect(() => { localStorage.setItem('dm_pins_v4', JSON.stringify(rolePins)); }, [rolePins]);
-      useEffect(() => { if (appLogo) localStorage.setItem('dm_app_logo_v4', appLogo); }, [appLogo]);
+      useEffect(() => { localStorage.setItem('dm_inventory_v5', JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem('dm_workers_v5', JSON.stringify(workers)); }, [workers]);
+      useEffect(() => { localStorage.setItem('dm_projects_v5', JSON.stringify(projects)); }, [projects]);
+      useEffect(() => { localStorage.setItem('dm_logs_v5', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
+      useEffect(() => { localStorage.setItem('dm_pins_v5', JSON.stringify(rolePins)); }, [rolePins]);
+      useEffect(() => { if (appLogo) localStorage.setItem('dm_app_logo_v5', appLogo); }, [appLogo]);
 
-      // Category Definitions
       const categories = ['All', 'Staging & Trusses', 'Wedding Decor & Props', 'Fabrics & Drapes', 'Bar Structures', 'Detailing Props'];
 
-      // --- PERMISSION RIGID RULES ---
+      // --- PERMISSION RULES ---
       const isOwner = currentUser?.role === 'owner';
       const isFactory = currentUser?.role === 'factory_staff';
       const isOffice = currentUser?.role === 'office_staff';
@@ -139,7 +152,6 @@
       const canManageSettings = isOwner;
       const canCreateProjects = isOwner || isPlanner;
 
-      // File helper to convert local images to Base64 strings
       const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -147,7 +159,6 @@
         reader.onerror = error => reject(error);
       });
 
-      // Photo Upload Handlers
       const handleLogoUpload = async (e) => {
         const file = e.target.files[0];
         if (file) setAppLogo(await convertFileToBase64(file));
@@ -163,7 +174,6 @@
         if (file && editingItem) setEditingItem({ ...editingItem, image: await convertFileToBase64(file) });
       };
 
-      // Authentication Handler
       const handleLogin = (e) => {
         e.preventDefault();
         if (rolePins[loginRole] === pinInput) {
@@ -181,16 +191,22 @@
         if (r === 'owner') return '👑 Owner / Managing Director';
         if (r === 'planner') return '📋 Event Director & Planner';
         if (r === 'factory_staff') return '🏭 Warehouse & Operations Manager';
-        if (r === 'office_staff') return '💼 Office Administrator & HR';
+        if (r === 'office_staff') return '💼 Office Staff & HR';
         return 'System Operator';
       }
 
-      // Calculations & Aggregation
+      // Aggregate Calculations
       const totalStock = useMemo(() => inventory.reduce((a, b) => a + Number(b.total), 0), [inventory]);
       const totalOut = useMemo(() => inventory.reduce((a, b) => a + Number(b.out || 0), 0), [inventory]);
       const totalMaint = useMemo(() => inventory.reduce((a, b) => a + Number(b.maintenance || 0), 0), [inventory]);
       const totalAvailable = totalStock - totalOut - totalMaint;
-      const assetValuation = useMemo(() => inventory.reduce((a, b) => a + (Number(b.purchaseCost || 0) * Number(b.total)), 0), [inventory]);
+
+      const dashboardInventoryList = useMemo(() => {
+        return inventory.filter(item => 
+          item.name.toLowerCase().includes(dashSearchTerm.toLowerCase()) ||
+          item.category.toLowerCase().includes(dashSearchTerm.toLowerCase())
+        );
+      }, [inventory, dashSearchTerm]);
 
       const filteredInventory = useMemo(() => {
         return inventory.filter(item => {
@@ -202,7 +218,6 @@
         });
       }, [inventory, selectedCategory, searchTerm]);
 
-      // Stock Movement Handler
       const handleStockAction = (id, field, delta, targetProject = 'General Site') => {
         if (!canManageInventory) return;
         setInventory(prev => prev.map(item => {
@@ -210,7 +225,6 @@
             const currentVal = item[field] || 0;
             const newVal = Math.max(0, currentVal + delta);
             
-            // Log movement history
             const logEntry = {
               id: 'LOG-' + Date.now(),
               timestamp: new Date().toLocaleString(),
@@ -228,7 +242,6 @@
         }));
       };
 
-      // Add New Item
       const handleSaveNewItem = (e) => {
         e.preventDefault();
         if (!canManageInventory || !newItem.name) return;
@@ -238,11 +251,10 @@
           total: Number(newItem.total),
           out: 0,
           maintenance: 0,
-          purchaseCost: Number(newItem.purchaseCost) || 0,
           image: newItem.image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80'
         };
         setInventory([...inventory, item]);
-        setNewItem({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '', serialNo: '', purchaseCost: '', condition: 'Good', description: '', image: '' });
+        setNewItem({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '', serialNo: '', description: '', image: '' });
       };
 
       const handleUpdateItem = (e) => {
@@ -273,9 +285,7 @@
         setNewProject({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
       };
 
-      // -------------------------------------------------------------
-      // RENDER: LOGIN PORTAL
-      // -------------------------------------------------------------
+      // LOGIN PORTAL
       if (!currentUser) {
         return (
           <div className="min-h-screen flex items-center justify-center p-4 bg-[#0D0214]">
@@ -287,7 +297,7 @@
                   <div className="w-20 h-20 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-2xl flex items-center justify-center text-black font-black text-3xl mx-auto mb-3 shadow-xl shadow-amber-500/20">★</div>
                 )}
                 <h1 className="text-2xl font-black tracking-tight text-amber-400">D M PRODUCTIONS</h1>
-                <p className="text-[11px] text-purple-300 font-bold uppercase tracking-widest mt-1">Enterprise Asset Portal</p>
+                <p className="text-[11px] text-purple-300 font-bold uppercase tracking-widest mt-1">Enterprise Operations Portal</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-5">
@@ -321,12 +331,9 @@
         );
       }
 
-      // -------------------------------------------------------------
-      // RENDER: MAIN DASHBOARD & OPERATIONAL SYSTEM
-      // -------------------------------------------------------------
+      // MAIN APP NAVIGATION & TABS
       return (
         <div className="min-h-screen pb-16">
-          {/* Top Operational Header */}
           <header className="bg-[#1B0626] border-b border-purple-900/60 sticky top-0 z-50 px-6 py-3.5 flex justify-between items-center backdrop-blur-md">
             <div className="flex items-center gap-3.5">
               {appLogo ? (
@@ -344,12 +351,11 @@
             </button>
           </header>
 
-          {/* Strict Role Navigation Toolbar */}
           <div className="bg-[#13031C] border-b border-purple-900/40 px-6 py-2.5 sticky top-[63px] z-40 flex gap-2 overflow-x-auto">
             {!isFactory && (
-              <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dashboard' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📊 Analytics Dashboard</button>
+              <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dashboard' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📊 Inventory Dashboard</button>
             )}
-            <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'catalog' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📦 Inventory Catalog & Assets</button>
+            <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'catalog' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📦 Catalog & Manage Items</button>
             
             {canManageInventory && (
               <>
@@ -373,11 +379,11 @@
 
           <main className="max-w-7xl mx-auto px-6 mt-6 space-y-6">
 
-            {/* TAB: EXECUTIVE DASHBOARD */}
+            {/* TAB: INVENTORY DASHBOARD WITH SPECIFIC ITEM BREAKDOWNS */}
             {activeTab === 'dashboard' && !isFactory && (
               <div className="space-y-6">
-                {/* Metric Cards Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {/* Metric Summary Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80">
                     <p className="text-[11px] text-purple-300 font-bold uppercase">Total Inventory Units</p>
                     <p className="text-3xl font-black text-white mt-1">{totalStock}</p>
@@ -387,27 +393,73 @@
                     <p className="text-3xl font-black text-emerald-400 mt-1">{totalAvailable}</p>
                   </div>
                   <div className="bg-[#1B0626] p-5 rounded-2xl border border-amber-500/40">
-                    <p className="text-[11px] text-amber-400 font-bold uppercase">Deployed At Venues</p>
+                    <p className="text-[11px] text-amber-400 font-bold uppercase">Deployed OUT</p>
                     <p className="text-3xl font-black text-amber-400 mt-1">{totalOut}</p>
                   </div>
                   <div className="bg-[#1B0626] p-5 rounded-2xl border border-rose-500/40">
-                    <p className="text-[11px] text-rose-400 font-bold uppercase">Under Maintenance</p>
+                    <p className="text-[11px] text-rose-400 font-bold uppercase">Maintenance / Damaged</p>
                     <p className="text-3xl font-black text-rose-400 mt-1">{totalMaint}</p>
-                  </div>
-                  <div className="bg-[#1B0626] p-5 rounded-2xl border border-blue-500/40 col-span-2 md:col-span-1">
-                    <p className="text-[11px] text-blue-400 font-bold uppercase">Asset Valuation</p>
-                    <p className="text-2xl font-black text-blue-300 mt-1">₹{assetValuation.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
 
-                {/* Dispatch Logs Audit Trail */}
+                {/* Specific Inventory Items Live List */}
+                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                  <div className="flex flex-col md:flex-row justify-between md:items-center gap-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-amber-400">📋 Warehouse Stock Breakdown</h3>
+                      <p className="text-xs text-purple-300 mt-0.5">Live counts for specific items (Angle Ply 8x4, Angle Ply 6x4, Mirror Bar, Vintage Bar, etc.)</p>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Filter Dashboard Items..."
+                      value={dashSearchTerm}
+                      onChange={e => setDashSearchTerm(e.target.value)}
+                      className="bg-[#0D0214] border border-purple-700 px-4 py-2 rounded-xl text-xs text-white w-full md:w-64 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {dashboardInventoryList.map(item => {
+                      const readyInWarehouse = item.total - item.out - item.maintenance;
+                      return (
+                        <div key={item.id} className="bg-[#0D0214] p-4 rounded-xl border border-purple-900/80 flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3.5">
+                            <img src={item.image} className="w-14 h-14 rounded-xl object-cover border border-purple-800" />
+                            <div>
+                              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">{item.category}</span>
+                              <h4 className="font-extrabold text-white text-base leading-tight">{item.name}</h4>
+                              <p className="text-xs text-purple-400 mt-1">Rack: {item.rackLocation || 'Unassigned'}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 text-center">
+                            <div className="bg-[#1B0626] px-3 py-2 rounded-xl border border-purple-800 min-w-[75px]">
+                              <p className="text-[9px] text-purple-300 font-bold uppercase">Total Units</p>
+                              <p className="text-sm font-black text-white mt-0.5">{item.total} {item.unit}</p>
+                            </div>
+                            <div className="bg-[#1B0626] px-3 py-2 rounded-xl border border-emerald-500/40 min-w-[85px]">
+                              <p className="text-[9px] text-emerald-400 font-bold uppercase">Ready In Whse</p>
+                              <p className="text-sm font-black text-emerald-400 mt-0.5">{readyInWarehouse} {item.unit}</p>
+                            </div>
+                            <div className="bg-[#1B0626] px-3 py-2 rounded-xl border border-amber-500/40 min-w-[65px]">
+                              <p className="text-[9px] text-amber-400 font-bold uppercase">Deployed</p>
+                              <p className="text-sm font-black text-amber-400 mt-0.5">{item.out} {item.unit}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Dispatch Audit Logs */}
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
                   <h3 className="text-lg font-bold text-amber-400 flex items-center justify-between">
-                    <span>📜 Real-Time Dispatch & Logistics Movement History</span>
-                    <span className="text-xs font-normal text-purple-300">{dispatchLogs.length} Records Logged</span>
+                    <span>📜 Real-Time Dispatch & Movements History</span>
+                    <span className="text-xs font-normal text-purple-300">{dispatchLogs.length} Records</span>
                   </h3>
 
-                  <div className="max-h-80 overflow-y-auto space-y-2.5 pr-2">
+                  <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
                     {dispatchLogs.length === 0 ? (
                       <p className="text-xs text-purple-400 py-4 text-center">No recent material movements recorded in this session.</p>
                     ) : (
@@ -435,11 +487,10 @@
             {/* TAB: CATALOG & ASSETS */}
             {activeTab === 'catalog' && (
               <div className="space-y-6">
-                {/* Search & Category Filter Toolbar */}
                 <div className="flex flex-col md:flex-row gap-3 justify-between items-center bg-[#1B0626] p-4 rounded-2xl border border-purple-800/80">
                   <input
                     type="text"
-                    placeholder="Search by Name, Serial No, or Rack Location..."
+                    placeholder="Search Angle Ply, Bars, Truss, etc..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     className="w-full md:w-96 bg-[#0D0214] border border-purple-700/80 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400"
@@ -457,14 +508,13 @@
                   </div>
                 </div>
 
-                {/* Add New Detailed Item Form (Restricted) */}
                 {canManageInventory && (
                   <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                    <h3 className="text-lg font-bold text-amber-400">➕ Register New Inventory & Asset Record</h3>
+                    <h3 className="text-lg font-bold text-amber-400">➕ Add New Inventory Item</h3>
                     <form onSubmit={handleSaveNewItem} className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <label className="text-xs text-purple-300 font-bold">Item Name</label>
-                        <input type="text" required placeholder="e.g. Sharpy Beam Light 15R" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                        <input type="text" required placeholder="e.g. Angle Ply (8x4 ft)" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
                       </div>
                       <div>
                         <label className="text-xs text-purple-300 font-bold">Category</label>
@@ -478,38 +528,33 @@
                       </div>
                       <div>
                         <label className="text-xs text-purple-300 font-bold">Warehouse Rack Location</label>
-                        <input type="text" placeholder="e.g. Zone B - Bay 02" value={newItem.rackLocation} onChange={e => setNewItem({...newItem, rackLocation: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                        <input type="text" placeholder="e.g. Zone A - Rack 04" value={newItem.rackLocation} onChange={e => setNewItem({...newItem, rackLocation: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
                       </div>
                       <div>
-                        <label className="text-xs text-purple-300 font-bold">Serial / Identification No</label>
-                        <input type="text" placeholder="e.g. DM-LIGHT-99" value={newItem.serialNo} onChange={e => setNewItem({...newItem, serialNo: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                        <label className="text-xs text-purple-300 font-bold">Serial / Code No</label>
+                        <input type="text" placeholder="e.g. DM-STG-8x4-01" value={newItem.serialNo} onChange={e => setNewItem({...newItem, serialNo: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
                       </div>
                       <div>
-                        <label className="text-xs text-purple-300 font-bold">Purchase Unit Cost (₹)</label>
-                        <input type="number" placeholder="25000" value={newItem.purchaseCost} onChange={e => setNewItem({...newItem, purchaseCost: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-purple-300 font-bold">Upload Custom Profile Image</label>
+                        <label className="text-xs text-purple-300 font-bold">Upload Custom Profile Photo</label>
                         <input type="file" accept="image/*" onChange={handleNewItemPhotoUpload} className="w-full bg-[#0D0214] p-2 rounded-xl border border-purple-700/80 text-xs mt-1" />
                       </div>
-                      <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-black p-3 rounded-xl text-sm self-end transition">
-                        + Save Asset Record
+                      <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-black p-3 rounded-xl text-sm self-end transition col-span-2">
+                        + Save Item Record
                       </button>
                     </form>
                   </div>
                 )}
 
-                {/* Edit Modal / Panel */}
                 {canManageInventory && editingItem && (
                   <div className="bg-[#260833] p-6 rounded-2xl border-2 border-amber-500 space-y-4 shadow-2xl">
-                    <h3 className="text-lg font-bold text-amber-400">✏️ Modify Asset Specifications & Metadata: {editingItem.name}</h3>
+                    <h3 className="text-lg font-bold text-amber-400">✏️ Modify Asset Specifications: {editingItem.name}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <label className="text-xs text-purple-300 font-bold">Item Name</label>
                         <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-[#0D0214] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
                       </div>
                       <div>
-                        <label className="text-xs text-purple-300 font-bold">Total Stock</label>
+                        <label className="text-xs text-purple-300 font-bold">Total Stock Quantity</label>
                         <input type="number" value={editingItem.total} onChange={e => setEditingItem({...editingItem, total: Number(e.target.value)})} className="w-full bg-[#0D0214] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
                       </div>
                       <div>
@@ -517,7 +562,7 @@
                         <input type="text" value={editingItem.rackLocation || ''} onChange={e => setEditingItem({...editingItem, rackLocation: e.target.value})} className="w-full bg-[#0D0214] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
                       </div>
                       <div>
-                        <label className="text-xs text-purple-300 font-bold">Update Profile Photo</label>
+                        <label className="text-xs text-purple-300 font-bold">Update Photo</label>
                         <input type="file" accept="image/*" onChange={handleEditItemPhotoUpload} className="w-full bg-[#0D0214] p-1.5 rounded-xl text-xs border border-purple-700 mt-1" />
                       </div>
                     </div>
@@ -528,10 +573,9 @@
                   </div>
                 )}
 
-                {/* Catalog Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {filteredInventory.map(item => {
-                    const avail = item.total - item.out - item.maintenance;
+                    const readyInWarehouse = item.total - item.out - item.maintenance;
                     return (
                       <div key={item.id} className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80 flex flex-col justify-between hover:border-purple-600/80 transition">
                         <div>
@@ -544,20 +588,20 @@
 
                           <span className="text-[10px] uppercase tracking-wider font-extrabold text-amber-400">{item.category}</span>
                           <h4 className="font-extrabold text-white text-base mt-0.5">{item.name}</h4>
-                          <p className="text-xs text-purple-300 font-mono mt-1">📍 {item.rackLocation || 'Unassigned Rack'} | SN: {item.serialNo || 'N/A'}</p>
+                          <p className="text-xs text-purple-300 font-mono mt-1">📍 {item.rackLocation || 'Unassigned Rack'}</p>
 
                           <div className="grid grid-cols-3 gap-2 mt-4 text-center">
                             <div className="bg-[#0D0214] p-2 rounded-xl border border-purple-900">
-                              <p className="text-[10px] text-purple-400 font-bold uppercase">Total</p>
-                              <p className="font-black text-sm text-white">{item.total}</p>
+                              <p className="text-[9px] text-purple-400 font-bold uppercase">Total Inventory Units</p>
+                              <p className="font-black text-sm text-white mt-0.5">{item.total}</p>
                             </div>
                             <div className="bg-[#0D0214] p-2 rounded-xl border border-purple-900">
-                              <p className="text-[10px] text-emerald-400 font-bold uppercase">Ready</p>
-                              <p className="font-black text-sm text-emerald-400">{avail}</p>
+                              <p className="text-[9px] text-emerald-400 font-bold uppercase">Ready In Warehouse</p>
+                              <p className="font-black text-sm text-emerald-400 mt-0.5">{readyInWarehouse}</p>
                             </div>
                             <div className="bg-[#0D0214] p-2 rounded-xl border border-purple-900">
-                              <p className="text-[10px] text-amber-400 font-bold uppercase">On Site</p>
-                              <p className="font-black text-sm text-amber-400">{item.out}</p>
+                              <p className="text-[9px] text-amber-400 font-bold uppercase">Deployed OUT</p>
+                              <p className="font-black text-sm text-amber-400 mt-0.5">{item.out}</p>
                             </div>
                           </div>
                         </div>
@@ -565,7 +609,7 @@
                         {canManageInventory && (
                           <div className="flex gap-2 mt-4 pt-3 border-t border-purple-900/60">
                             <button onClick={() => setEditingItem(item)} className="flex-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 p-2.5 rounded-xl text-xs font-bold border border-amber-500/30 transition">
-                              📷 Edit Details & Photo
+                              📷 Edit Item & Photo
                             </button>
                             <button onClick={() => handleDeleteItem(item.id)} className="bg-rose-950/60 hover:bg-rose-900 text-rose-300 p-2.5 rounded-xl text-xs font-bold border border-rose-800/60 transition">
                               🗑️
@@ -579,17 +623,16 @@
               </div>
             )}
 
-            {/* TAB: SITE DISPATCH LOGISTICS */}
+            {/* TAB: DISPATCH OUT */}
             {activeTab === 'dispatch' && canManageInventory && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-6">
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-purple-900/60 pb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-amber-400">🚚 Warehouse Material Dispatch (Workshop ➔ Event Site)</h3>
-                    <p className="text-xs text-purple-300 mt-0.5">Select a destination venue project and dispatch inventory items.</p>
+                    <h3 className="text-xl font-bold text-amber-400">🚚 Dispatch Material (Workshop ➔ Event Venue)</h3>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-purple-300 font-bold">Destination Event Site:</label>
+                    <label className="text-xs text-purple-300 font-bold">Event Site:</label>
                     <select 
                       value={selectedProjectForDispatch} 
                       onChange={e => setSelectedProjectForDispatch(e.target.value)}
@@ -603,7 +646,7 @@
                 
                 <div className="space-y-3">
                   {inventory.map(item => {
-                    const avail = item.total - item.out - item.maintenance;
+                    const readyInWarehouse = item.total - item.out - item.maintenance;
                     return (
                       <div key={item.id} className="bg-[#0D0214] p-4 rounded-xl border border-purple-900/80 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex items-center gap-3.5">
@@ -611,15 +654,15 @@
                           <div>
                             <h4 className="font-extrabold text-white text-base">{item.name}</h4>
                             <p className="text-xs text-purple-400">
-                              Available in Warehouse: <span className="text-emerald-400 font-bold">{avail} {item.unit}</span> | Currently Deployed: <span className="text-amber-400 font-bold">{item.out} {item.unit}</span>
+                              Ready In Warehouse: <span className="text-emerald-400 font-bold">{readyInWarehouse} {item.unit}</span> | Total Inventory Units: <span className="text-white font-bold">{item.total} {item.unit}</span>
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => handleStockAction(item.id, 'out', 1, selectedProjectForDispatch)} disabled={avail <= 0} className="px-4 py-2.5 bg-amber-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-amber-400 transition">
+                          <button onClick={() => handleStockAction(item.id, 'out', 1, selectedProjectForDispatch)} disabled={readyInWarehouse <= 0} className="px-4 py-2.5 bg-amber-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-amber-400 transition">
                             + Dispatch 1 Unit
                           </button>
-                          <button onClick={() => handleStockAction(item.id, 'out', 5, selectedProjectForDispatch)} disabled={avail < 5} className="px-4 py-2.5 bg-amber-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-amber-400 transition">
+                          <button onClick={() => handleStockAction(item.id, 'out', 5, selectedProjectForDispatch)} disabled={readyInWarehouse < 5} className="px-4 py-2.5 bg-amber-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-amber-400 transition">
                             + Dispatch 5 Units
                           </button>
                         </div>
@@ -630,7 +673,7 @@
               </div>
             )}
 
-            {/* TAB: WAREHOUSE INWARD LOGISTICS */}
+            {/* TAB: RETURN IN */}
             {activeTab === 'return' && canManageInventory && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-6">
                 <h3 className="text-xl font-bold text-amber-400">📥 Return Logistics Inward (Event Site ➔ Warehouse)</h3>
@@ -641,7 +684,7 @@
                         <img src={item.image} className="w-14 h-14 rounded-xl object-cover border border-purple-800" />
                         <div>
                           <h4 className="font-extrabold text-white text-base">{item.name}</h4>
-                          <p className="text-xs text-purple-400">Deployed at Active Venues: <span className="text-amber-400 font-bold">{item.out} {item.unit}</span></p>
+                          <p className="text-xs text-purple-400">Deployed OUT: <span className="text-amber-400 font-bold">{item.out} {item.unit}</span></p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -658,7 +701,7 @@
               </div>
             )}
 
-            {/* TAB: ON-SITE LABOR & ATTENDANCE */}
+            {/* TAB: LABOR & WORKFORCE */}
             {activeTab === 'labor' && canManageLabor && (
               <div className="space-y-6">
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
@@ -677,7 +720,7 @@
                 </div>
 
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                  <h3 className="text-lg font-bold text-amber-400">Daily Attendance & Roster Deployment</h3>
+                  <h3 className="text-lg font-bold text-amber-400">Daily Attendance Tracker</h3>
                   <div className="space-y-3">
                     {workers.map(w => (
                       <div key={w.id} className="bg-[#0D0214] p-4 rounded-xl border border-purple-900/80 flex justify-between items-center">
@@ -701,11 +744,11 @@
               </div>
             )}
 
-            {/* TAB: PROJECTS & EVENT SITES */}
+            {/* TAB: PROJECTS & SITES */}
             {activeTab === 'projects' && canCreateProjects && (
               <div className="space-y-6">
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                  <h3 className="text-lg font-bold text-amber-400">🎪 Create New Event Venue Site</h3>
+                  <h3 className="text-lg font-bold text-amber-400">🎪 Register Event Site</h3>
                   <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <input type="text" required placeholder="Client / Event Name" value={newProject.clientName} onChange={e => setNewProject({...newProject, clientName: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <input type="text" placeholder="Venue Location" value={newProject.location} onChange={e => setNewProject({...newProject, location: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
@@ -733,19 +776,19 @@
               </div>
             )}
 
-            {/* TAB: SYSTEM CONFIGURATION */}
+            {/* TAB: SETTINGS */}
             {activeTab === 'settings' && canManageSettings && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 max-w-xl space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-amber-400">📷 Change Company Branding Logo</h3>
-                  <p className="text-xs text-purple-300 mt-1">Upload custom logo image. Persists automatically across browser sessions.</p>
+                  <h3 className="text-lg font-bold text-amber-400">📷 Company Logo Branding</h3>
+                  <p className="text-xs text-purple-300 mt-1">Upload custom logo image. Persists automatically.</p>
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="mt-3 bg-[#0D0214] p-2.5 rounded-xl border border-purple-700/80 text-xs w-full" />
                 </div>
 
                 <hr className="border-purple-900/80" />
 
                 <div>
-                  <h3 className="text-lg font-bold text-amber-400 mb-3">⚙️ System Access Security PIN Controls</h3>
+                  <h3 className="text-lg font-bold text-amber-400 mb-3">⚙️ Change Access Security PINs</h3>
                   <div className="space-y-2.5">
                     {Object.keys(rolePins).map(role => (
                       <div key={role} className="flex items-center justify-between bg-[#0D0214] p-3.5 rounded-xl border border-purple-900">
