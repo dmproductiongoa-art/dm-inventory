@@ -28,14 +28,17 @@
     ];
 
     const INITIAL_WORKERS = [
-      { id: 'WRK-001', name: 'Ramesh Kumar', type: 'Permanent', role: 'Lead Stage Crew', status: 'Present', dailyWage: 950 },
-      { id: 'WRK-002', name: 'Suresh Naik', type: 'Contractor', role: 'Fabric Decorator', status: 'Present', dailyWage: 1100 },
-      { id: 'WRK-003', name: 'Amit Sharma', type: 'Freelancer', role: 'Rigging Engineer', status: 'Absent', dailyWage: 1500 }
+      { id: 'WRK-001', name: 'Ramesh Kumar', type: 'Inhouse', role: 'Lead Stage Crew', status: 'Present', sitePresence: 'In Warehouse', dailyWage: 950 },
+      { id: 'WRK-002', name: 'Suresh Naik', type: 'Inhouse', role: 'Fabric Decorator', status: 'Present', sitePresence: 'In Warehouse', dailyWage: 1100 },
+      { id: 'WRK-003', name: 'Amit Sharma', type: 'Market Labour', role: 'Rigging Engineer', status: 'Present', sitePresence: 'Singhania Wedding', dailyWage: 1500 },
+      { id: 'WRK-004', name: 'Vikram Singh', type: 'Market Labour', role: 'General Helper', status: 'Present', sitePresence: 'Tech Summit 2026', dailyWage: 750 },
+      { id: 'WRK-005', name: 'Pooja Verma', type: 'Inhouse', role: 'Site Supervisor', status: 'Absent', sitePresence: 'Off Duty', dailyWage: 1300 }
     ];
 
     const INITIAL_PROJECTS = [
-      { id: 'PRJ-501', clientName: 'Singhania Wedding', location: 'Grand Hyatt Lawn', eventDate: '2026-10-15' },
-      { id: 'PRJ-502', clientName: 'Tech Summit 2026', location: 'Exhibition Center - Hall 3', eventDate: '2026-11-02' }
+      { id: 'PRJ-501', clientName: 'Singhania Wedding', location: 'Grand Hyatt Lawn', eventDate: '2026-09-05', status: 'Ongoing' },
+      { id: 'PRJ-502', clientName: 'Tech Summit 2026', location: 'Exhibition Center - Hall 3', eventDate: '2026-09-12', status: 'Upcoming' },
+      { id: 'PRJ-503', clientName: 'Royal Gala Dinner', location: 'Taj Palace', eventDate: '2026-09-18', status: 'Upcoming' }
     ];
 
     function App() {
@@ -43,34 +46,32 @@
       const [loginRole, setLoginRole] = useState('owner');
       const [pinInput, setPinInput] = useState('');
 
-      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v7')) || DEFAULT_PINS);
-      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v7') || null);
+      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v8')) || DEFAULT_PINS);
+      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v8') || null);
 
       const [activeTab, setActiveTab] = useState('dispatch');
-      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v7')) || INITIAL_INVENTORY);
-      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v7')) || INITIAL_WORKERS);
-      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v7')) || INITIAL_PROJECTS);
-      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v7')) || []);
+      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v8')) || INITIAL_INVENTORY);
+      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v8')) || INITIAL_WORKERS);
+      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v8')) || INITIAL_PROJECTS);
+      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v8')) || []);
 
-      // Simplified Tab Selection State
       const [selectedCatTab, setSelectedCatTab] = useState('Staging & Trusses');
       const [selectedItemId, setSelectedItemId] = useState('');
       const [dispatchQuantity, setDispatchQuantity] = useState(1);
       const [targetProject, setTargetProject] = useState(projects[0]?.clientName || 'General Site');
       const [actionType, setActionType] = useState('OUT');
 
-      // Catalog Filter & Modals
-      const [searchTerm, setSearchTerm] = useState('');
+      // Forms State
       const [newItem, setNewItem] = useState({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '' });
-      const [newWorker, setNewWorker] = useState({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800 });
-      const [newProject, setNewProject] = useState({ clientName: '', location: '', eventDate: '' });
+      const [newWorker, setNewWorker] = useState({ name: '', type: 'Inhouse', role: 'Stage Crew', sitePresence: 'In Warehouse', dailyWage: 800 });
+      const [newProject, setNewProject] = useState({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
 
       // Persistence Sync
-      useEffect(() => { localStorage.setItem('dm_inventory_v7', JSON.stringify(inventory)); }, [inventory]);
-      useEffect(() => { localStorage.setItem('dm_workers_v7', JSON.stringify(workers)); }, [workers]);
-      useEffect(() => { localStorage.setItem('dm_projects_v7', JSON.stringify(projects)); }, [projects]);
-      useEffect(() => { localStorage.setItem('dm_logs_v7', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
-      useEffect(() => { localStorage.setItem('dm_pins_v7', JSON.stringify(rolePins)); }, [rolePins]);
+      useEffect(() => { localStorage.setItem('dm_inventory_v8', JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem('dm_workers_v8', JSON.stringify(workers)); }, [workers]);
+      useEffect(() => { localStorage.setItem('dm_projects_v8', JSON.stringify(projects)); }, [projects]);
+      useEffect(() => { localStorage.setItem('dm_logs_v8', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
+      useEffect(() => { localStorage.setItem('dm_pins_v8', JSON.stringify(rolePins)); }, [rolePins]);
 
       const categories = ['Staging & Trusses', 'Bar Structures', 'Fabrics & Drapes'];
 
@@ -82,10 +83,15 @@
 
       const canDispatch = isOwner || isPlanner || isFactory;
       const canManageCatalog = isOwner || isFactory;
-      const canManageLabor = isOwner || isOffice;
+      const canEditPersonnel = isOwner || isOffice; // Only Editable access to Office Staff & Owner
       const canManageSettings = isOwner;
 
-      // Logo Image File Handler
+      // Aggregates for Dashboard Header Cards
+      const ongoingEventsCount = useMemo(() => projects.filter(p => p.status === 'Ongoing').length, [projects]);
+      const upcomingEventsCount = useMemo(() => projects.filter(p => p.status === 'Upcoming').length, [projects]);
+      const availableInhouseCount = useMemo(() => workers.filter(w => w.type === 'Inhouse' && w.status === 'Present').length, [workers]);
+      const marketLaboursCount = useMemo(() => workers.filter(w => w.type === 'Market Labour').length, [workers]);
+
       const handleLogoUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -93,7 +99,7 @@
           reader.onloadend = () => {
             const base64Logo = reader.result;
             setAppLogo(base64Logo);
-            localStorage.setItem('dm_app_logo_v7', base64Logo);
+            localStorage.setItem('dm_app_logo_v8', base64Logo);
           };
           reader.readAsDataURL(file);
         }
@@ -101,13 +107,8 @@
 
       const handleClearLogo = () => {
         setAppLogo(null);
-        localStorage.removeItem('dm_app_logo_v7');
+        localStorage.removeItem('dm_app_logo_v8');
       };
-
-      // Aggregate Stats
-      const totalStock = useMemo(() => inventory.reduce((a, b) => a + Number(b.total), 0), [inventory]);
-      const totalOut = useMemo(() => inventory.reduce((a, b) => a + Number(b.out || 0), 0), [inventory]);
-      const totalWarehouse = totalStock - totalOut;
 
       const itemsInSelectedCategory = useMemo(() => {
         return inventory.filter(item => item.category === selectedCatTab);
@@ -187,14 +188,14 @@
         e.preventDefault();
         if (!newWorker.name) return;
         setWorkers([...workers, { ...newWorker, id: 'WRK-' + (100 + workers.length + 1), status: 'Present', dailyWage: Number(newWorker.dailyWage) }]);
-        setNewWorker({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800 });
+        setNewWorker({ name: '', type: 'Inhouse', role: 'Stage Crew', sitePresence: 'In Warehouse', dailyWage: 800 });
       };
 
       const handleAddProject = (e) => {
         e.preventDefault();
         if (!newProject.clientName) return;
         setProjects([...projects, { ...newProject, id: 'PRJ-' + (500 + projects.length + 1) }]);
-        setNewProject({ clientName: '', location: '', eventDate: '' });
+        setNewProject({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
       };
 
       // LOGIN SCREEN
@@ -209,7 +210,7 @@
                   <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center text-black font-black text-2xl mx-auto mb-3 shadow-lg">★</div>
                 )}
                 <h1 className="text-xl font-black text-amber-400">D M PRODUCTIONS</h1>
-                <p className="text-[11px] text-purple-300 font-bold uppercase tracking-widest mt-0.5">Operations Portal Login</p>
+                <p className="text-[11px] text-purple-300 font-bold uppercase tracking-widest mt-0.5">Operations Control Login</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-4">
@@ -239,7 +240,7 @@
 
       return (
         <div className="min-h-screen pb-12">
-          {/* TOP BRAND HEADER */}
+          {/* HEADER */}
           <header className="bg-[#1B0626] border-b border-purple-900/80 px-6 py-3 flex justify-between items-center sticky top-0 z-50">
             <div className="flex items-center gap-3">
               {appLogo ? (
@@ -257,7 +258,7 @@
             </button>
           </header>
 
-          {/* MAIN TABS NAVIGATION */}
+          {/* MAIN NAVIGATION TABS */}
           <div className="bg-[#13031C] border-b border-purple-900/60 px-6 py-2.5 flex gap-2 overflow-x-auto">
             {canDispatch && (
               <button onClick={() => setActiveTab('dispatch')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dispatch' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
@@ -272,13 +273,14 @@
                 📦 Catalog & Add Item
               </button>
             )}
-            {canManageLabor && (
-              <button onClick={() => setActiveTab('labor')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'labor' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-                👷 Staff & Labor
-              </button>
-            )}
+            <button onClick={() => setActiveTab('inhouse_staff')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'inhouse_staff' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
+              👷 Inhouse Employees
+            </button>
+            <button onClick={() => setActiveTab('market_labours')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'market_labours' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
+              🔨 Market Labours
+            </button>
             <button onClick={() => setActiveTab('projects')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'projects' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-              🎪 Registered Sites
+              🎪 Events & Sites
             </button>
             {canManageSettings && (
               <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'settings' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
@@ -289,34 +291,60 @@
 
           <main className="max-w-6xl mx-auto px-6 mt-5 space-y-5">
 
-            {/* DIRECT DISPLAY METRICS BAR (ALWAYS VISIBLE BELOW NAVIGATION TABS) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[#1B0626] p-4 rounded-2xl border border-purple-800/80 flex justify-between items-center">
+            {/* NEW TOP DASHBOARD OVERVIEW CARDS WITH REDIRECT LINKS */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              
+              {/* Ongoing Events Card */}
+              <div 
+                onClick={() => setActiveTab('projects')}
+                className="bg-[#1B0626] p-4 rounded-2xl border border-emerald-500/40 hover:border-emerald-400 cursor-pointer transition flex justify-between items-center group"
+              >
                 <div>
-                  <p className="text-[10px] text-purple-300 font-bold uppercase tracking-wider">Total Inventory Units</p>
-                  <p className="text-2xl font-black text-white mt-0.5">{totalStock}</p>
+                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider group-hover:underline">Ongoing Events</p>
+                  <p className="text-2xl font-black text-emerald-400 mt-0.5">{ongoingEventsCount}</p>
                 </div>
-                <div className="text-2xl">📦</div>
+                <div className="text-2xl">🔥</div>
               </div>
 
-              <div className="bg-[#1B0626] p-4 rounded-2xl border border-emerald-500/40 flex justify-between items-center">
+              {/* Upcoming Events Card */}
+              <div 
+                onClick={() => setActiveTab('projects')}
+                className="bg-[#1B0626] p-4 rounded-2xl border border-amber-500/40 hover:border-amber-400 cursor-pointer transition flex justify-between items-center group"
+              >
                 <div>
-                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Ready In Warehouse</p>
-                  <p className="text-2xl font-black text-emerald-400 mt-0.5">{totalWarehouse}</p>
+                  <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider group-hover:underline">Upcoming Events</p>
+                  <p className="text-2xl font-black text-amber-400 mt-0.5">{upcomingEventsCount}</p>
                 </div>
-                <div className="text-2xl">🏬</div>
+                <div className="text-2xl">📅</div>
               </div>
 
-              <div className="bg-[#1B0626] p-4 rounded-2xl border border-amber-500/40 flex justify-between items-center">
+              {/* Available Staff Inhouse Card */}
+              <div 
+                onClick={() => setActiveTab('inhouse_staff')}
+                className="bg-[#1B0626] p-4 rounded-2xl border border-purple-800/80 hover:border-purple-600 cursor-pointer transition flex justify-between items-center group"
+              >
                 <div>
-                  <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Deployed OUT On-Site</p>
-                  <p className="text-2xl font-black text-amber-400 mt-0.5">{totalOut}</p>
+                  <p className="text-[10px] text-purple-300 font-bold uppercase tracking-wider group-hover:underline">Available Staff Inhouse</p>
+                  <p className="text-2xl font-black text-white mt-0.5">{availableInhouseCount}</p>
                 </div>
-                <div className="text-2xl">🚚</div>
+                <div className="text-2xl">👷</div>
               </div>
+
+              {/* Market Labours Count Card */}
+              <div 
+                onClick={() => setActiveTab('market_labours')}
+                className="bg-[#1B0626] p-4 rounded-2xl border border-rose-500/40 hover:border-rose-400 cursor-pointer transition flex justify-between items-center group"
+              >
+                <div>
+                  <p className="text-[10px] text-rose-400 font-bold uppercase tracking-wider group-hover:underline">Market Labours Count</p>
+                  <p className="text-2xl font-black text-rose-400 mt-0.5">{marketLaboursCount}</p>
+                </div>
+                <div className="text-2xl">🔨</div>
+              </div>
+
             </div>
 
-            {/* TAB: SELECTION DISPATCH MODULE (FACTORY MANAGER & PLANNER) */}
+            {/* TAB: TAB DISPATCH ENTRY */}
             {activeTab === 'dispatch' && canDispatch && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800 space-y-5">
                 <div className="flex justify-between items-center border-b border-purple-900/80 pb-3">
@@ -327,7 +355,6 @@
                   </div>
                 </div>
 
-                {/* STEP 1: CATEGORY SELECTION TABS */}
                 <div>
                   <label className="block text-[11px] font-bold text-purple-300 uppercase mb-2">Step 1: Select Category Tab</label>
                   <div className="flex gap-2">
@@ -343,7 +370,6 @@
                   </div>
                 </div>
 
-                {/* STEP 2 & 3: ITEM SELECTION & COUNT ENTRY */}
                 <form onSubmit={handleExecuteMovement} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                   <div>
                     <label className="block text-[11px] font-bold text-purple-300 uppercase mb-1.5">Step 2: Select Specific Item</label>
@@ -392,26 +418,13 @@
                     </button>
                   </div>
                 </form>
-
-                {activeSelectedItem && (
-                  <div className="bg-[#0D0214] p-3 rounded-xl border border-purple-900/80 flex justify-between items-center text-xs">
-                    <div>
-                      <span className="text-purple-400">Selected Item Status: </span>
-                      <strong className="text-white ml-1">{activeSelectedItem.name}</strong>
-                    </div>
-                    <div className="flex gap-4">
-                      <span>Ready in Warehouse: <strong className="text-emerald-400">{activeSelectedItem.total - activeSelectedItem.out} {activeSelectedItem.unit}</strong></span>
-                      <span>Currently Deployed: <strong className="text-amber-400">{activeSelectedItem.out} {activeSelectedItem.unit}</strong></span>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* TAB: OVERVIEW TABLE */}
+            {/* TAB: LIVE INVENTORY OVERVIEW */}
             {(activeTab === 'overview' || isOwner) && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                <h3 className="text-base font-bold text-amber-400">📋 Comprehensive Inventory Breakdown</h3>
+                <h3 className="text-base font-bold text-amber-400">📋 Live Inventory Breakdown</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs text-purple-200">
                     <thead className="bg-[#0D0214] text-purple-300 uppercase font-mono border-b border-purple-800">
@@ -450,7 +463,7 @@
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
                   <h3 className="text-base font-bold text-amber-400">➕ Add New Inventory Item</h3>
                   <form onSubmit={handleAddItem} className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input type="text" required placeholder="Item Name (e.g. Vintage Bar)" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                    <input type="text" required placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <select value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm">
                       {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
@@ -462,76 +475,150 @@
               </div>
             )}
 
-            {/* TAB: STAFF & LABOR */}
-            {activeTab === 'labor' && canManageLabor && (
+            {/* TAB: INHOUSE EMPLOYEES (LIST OF EMPLOYEES - EDITABLE ONLY BY OWNER & OFFICE STAFF) */}
+            {activeTab === 'inhouse_staff' && (
               <div className="space-y-5">
-                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                  <h3 className="text-base font-bold text-amber-400">👷 Enroll Workforce & Daily Wage</h3>
-                  <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input type="text" required placeholder="Staff Full Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
-                    <select value={newWorker.type} onChange={e => setNewWorker({...newWorker, type: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm">
-                      <option value="Permanent">Permanent Staff</option>
-                      <option value="Contractor">Contractor Crew</option>
-                      <option value="Freelancer">Freelance Technician</option>
-                    </select>
-                    <input type="text" placeholder="Role / Designation" value={newWorker.role} onChange={e => setNewWorker({...newWorker, role: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
-                    <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
-                    <button type="submit" className="md:col-span-4 bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Enroll Crew Member</button>
-                  </form>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-bold text-amber-400">👷 List of Inhouse Employees</h3>
+                  {!canEditPersonnel && (
+                    <span className="text-xs bg-purple-950/80 text-purple-300 border border-purple-800 px-3 py-1 rounded-lg">🔒 View-Only Mode</span>
+                  )}
                 </div>
 
+                {canEditPersonnel && (
+                  <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                    <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Add Inhouse Employee</h4>
+                    <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <input type="text" required placeholder="Employee Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value, type: 'Inhouse'})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                      <input type="text" placeholder="Designation / Role" value={newWorker.role} onChange={e => setNewWorker({...newWorker, role: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                      <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                      <button type="submit" className="bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Add Employee</button>
+                    </form>
+                  </div>
+                )}
+
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-3">
-                  <h3 className="text-base font-bold text-amber-400">Attendance Tracker</h3>
-                  {workers.map(w => (
+                  {workers.filter(w => w.type === 'Inhouse').map(w => (
                     <div key={w.id} className="bg-[#0D0214] p-3.5 rounded-xl border border-purple-900 flex justify-between items-center text-xs">
                       <div>
                         <strong className="text-white text-sm">{w.name}</strong>
-                        <p className="text-purple-400 mt-0.5">{w.type} • {w.role} • ₹{w.dailyWage}/day</p>
+                        <p className="text-purple-400 mt-0.5">{w.role} • ₹{w.dailyWage}/day</p>
                       </div>
-                      <button
-                        onClick={() => setWorkers(workers.map(item => item.id === w.id ? { ...item, status: item.status === 'Present' ? 'Absent' : 'Present' } : item))}
-                        className={`px-3.5 py-1.5 rounded-lg font-bold ${w.status === 'Present' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-950/40 text-rose-400 border border-rose-800'}`}
-                      >
-                        {w.status === 'Present' ? '✓ Present' : '✗ Absent'}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <span className="text-purple-300 font-mono">Status: {w.status}</span>
+                        {canEditPersonnel ? (
+                          <button
+                            onClick={() => setWorkers(workers.map(item => item.id === w.id ? { ...item, status: item.status === 'Present' ? 'Absent' : 'Present' } : item))}
+                            className={`px-3 py-1 rounded-lg font-bold ${w.status === 'Present' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-950/40 text-rose-400 border border-rose-800'}`}
+                          >
+                            Toggle Status
+                          </button>
+                        ) : (
+                          <span className={`px-3 py-1 rounded-lg font-bold ${w.status === 'Present' ? 'text-emerald-400' : 'text-rose-400'}`}>{w.status}</span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* TAB: REGISTERED SITES */}
+            {/* TAB: MARKET LABOURS (LIST + SITE PRESENCES + WAGES - EDITABLE ONLY BY OWNER & OFFICE STAFF) */}
+            {activeTab === 'market_labours' && (
+              <div className="space-y-5">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-bold text-amber-400">🔨 Market Labours & Site Presence</h3>
+                  {!canEditPersonnel && (
+                    <span className="text-xs bg-purple-950/80 text-purple-300 border border-purple-800 px-3 py-1 rounded-lg">🔒 View-Only Mode</span>
+                  )}
+                </div>
+
+                {canEditPersonnel && (
+                  <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                    <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Register Market Labour</h4>
+                    <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <input type="text" required placeholder="Labour Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value, type: 'Market Labour'})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                      <input type="text" placeholder="Assigned Site Presence" value={newWorker.sitePresence} onChange={e => setNewWorker({...newWorker, sitePresence: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                      <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                      <button type="submit" className="bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Add Market Labour</button>
+                    </form>
+                  </div>
+                )}
+
+                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-3">
+                  {workers.filter(w => w.type === 'Market Labour').map(w => (
+                    <div key={w.id} className="bg-[#0D0214] p-3.5 rounded-xl border border-purple-900 flex justify-between items-center text-xs">
+                      <div>
+                        <strong className="text-white text-sm">{w.name}</strong>
+                        <p className="text-purple-400 mt-0.5">Role: {w.role} • 📍 Site: <span className="text-amber-300">{w.sitePresence}</span></p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-emerald-400 font-black text-sm">Wage: ₹{w.dailyWage}/day</p>
+                        {canEditPersonnel && (
+                          <button
+                            onClick={() => {
+                              const newWage = prompt('Enter updated wage for ' + w.name, w.dailyWage);
+                              if (newWage) setWorkers(workers.map(item => item.id === w.id ? { ...item, dailyWage: Number(newWage) } : item));
+                            }}
+                            className="text-[10px] text-purple-400 hover:text-amber-400 underline mt-1"
+                          >
+                            Edit Wage
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: EVENTS & SITES (EDITABLE & OVERVIEW LIST) */}
             {activeTab === 'projects' && (
               <div className="space-y-5">
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                  <h3 className="text-base font-bold text-amber-400">🎪 Register Event Site</h3>
-                  <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <h3 className="text-base font-bold text-amber-400">🎪 Registered Events Overview & Management</h3>
+                  <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <input type="text" required placeholder="Client / Event Name" value={newProject.clientName} onChange={e => setNewProject({...newProject, clientName: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <input type="text" placeholder="Venue Location" value={newProject.location} onChange={e => setNewProject({...newProject, location: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <input type="date" value={newProject.eventDate} onChange={e => setNewProject({...newProject, eventDate: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm text-white" />
-                    <button type="submit" className="md:col-span-3 bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Register Event Venue</button>
+                    <select value={newProject.status} onChange={e => setNewProject({...newProject, status: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm text-white">
+                      <option value="Upcoming">Upcoming</option>
+                      <option value="Ongoing">Ongoing</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                    <button type="submit" className="md:col-span-4 bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Register Event Site</button>
                   </form>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {projects.map(p => (
-                    <div key={p.id} className="bg-[#1B0626] p-4 rounded-xl border border-purple-800/80">
-                      <span className="text-[10px] font-mono text-amber-400 font-bold">{p.id}</span>
+                    <div key={p.id} className="bg-[#1B0626] p-4 rounded-xl border border-purple-800/80 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-mono text-amber-400 font-bold">{p.id}</span>
+                        <select
+                          value={p.status}
+                          onChange={e => setProjects(projects.map(item => item.id === p.id ? { ...item, status: e.target.value } : item))}
+                          className={`text-xs font-bold px-2 py-1 rounded-lg border bg-[#0D0214] ${p.status === 'Ongoing' ? 'text-emerald-400 border-emerald-500/40' : 'text-amber-400 border-amber-500/40'}`}
+                        >
+                          <option value="Ongoing">Ongoing</option>
+                          <option value="Upcoming">Upcoming</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+                      </div>
                       <h4 className="font-extrabold text-white text-base">{p.clientName}</h4>
                       <p className="text-xs text-purple-300">📍 {p.location}</p>
+                      <p className="text-[11px] text-purple-400">📅 Date: {p.eventDate}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* TAB: SETTINGS & LOGO UPLOAD */}
+            {/* TAB: SETTINGS */}
             {activeTab === 'settings' && canManageSettings && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 max-w-xl space-y-6">
                 <div>
                   <h3 className="text-base font-bold text-amber-400">📷 Company Logo Branding</h3>
-                  <p className="text-xs text-purple-300 mt-1">Upload image file to set header and login branding across all devices.</p>
-                  
                   <div className="mt-4 flex items-center gap-4">
                     {appLogo ? (
                       <img src={appLogo} className="w-16 h-16 rounded-xl object-contain bg-[#0D0214] p-1 border-2 border-amber-400" />
@@ -541,30 +628,9 @@
                     <div className="space-y-2">
                       <input type="file" accept="image/*" onChange={handleLogoUpload} className="bg-[#0D0214] p-2 rounded-xl border border-purple-700 text-xs text-purple-200" />
                       {appLogo && (
-                        <button onClick={handleClearLogo} className="block text-xs font-bold text-rose-400 hover:underline">
-                          Reset to Default Star
-                        </button>
+                        <button onClick={handleClearLogo} className="block text-xs font-bold text-rose-400 hover:underline">Reset Logo</button>
                       )}
                     </div>
-                  </div>
-                </div>
-
-                <hr className="border-purple-900" />
-
-                <div>
-                  <h3 className="text-base font-bold text-amber-400 mb-3">⚙️ Access Security PIN Settings</h3>
-                  <div className="space-y-2">
-                    {Object.keys(rolePins).map(role => (
-                      <div key={role} className="flex items-center justify-between bg-[#0D0214] p-3 rounded-xl border border-purple-900">
-                        <span className="text-xs font-bold capitalize text-white">{role.replace('_', ' ')} PIN</span>
-                        <input
-                          type="text"
-                          value={rolePins[role]}
-                          onChange={e => setRolePins({ ...rolePins, [role]: e.target.value })}
-                          className="bg-[#1B0626] text-amber-400 font-mono font-bold px-3 py-1 rounded-lg border border-purple-700 w-24 text-center text-sm"
-                        />
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -572,10 +638,10 @@
 
             {/* AUDIT LOG */}
             <div className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80 space-y-3">
-              <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">📜 Real-Time Dispatch Log</h4>
+              <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">📜 Real-Time Session Audit Log</h4>
               <div className="space-y-2 max-h-36 overflow-y-auto">
                 {dispatchLogs.length === 0 ? (
-                  <p className="text-xs text-purple-400">No actions recorded in this session.</p>
+                  <p className="text-xs text-purple-400">No dispatch actions recorded in this session.</p>
                 ) : (
                   dispatchLogs.map(log => (
                     <div key={log.id} className="bg-[#0D0214] p-2 rounded-lg border border-purple-900 flex justify-between items-center text-xs">
