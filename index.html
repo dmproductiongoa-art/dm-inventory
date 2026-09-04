@@ -3,203 +3,317 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D M PRODUCTIONS — Warehouse & Workforce Manager</title>
+  <title>D M PRODUCTIONS — Enterprise ERP & Asset Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-[#14031D] text-white antialiased selection:bg-amber-500 selection:text-black">
+<body class="bg-[#0D0214] text-slate-100 antialiased selection:bg-amber-500 selection:text-black min-h-screen">
 
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useMemo, useEffect } = React;
 
+    // --- SYSTEM DEFAULTS & INITIAL DATA ---
     const DEFAULT_PINS = { owner: '1111', planner: '2222', factory_staff: '3333', office_staff: '4444' };
 
     const INITIAL_INVENTORY = [
-      { id: '1', name: 'Staging Angle Ply (8x4 ft)', category: 'Staging & Trusses', total: 100, out: 0, maintenance: 0, image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80', unit: 'Pcs' },
-      { id: '2', name: 'Aluminum Box Truss (10ft)', category: 'Staging & Trusses', total: 40, out: 12, maintenance: 1, image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80', unit: 'Pcs' },
-      { id: '3', name: 'Royal Velvet Drapes (Maroon)', category: 'Fabrics & Drapes', total: 60, out: 20, maintenance: 2, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=300&auto=format&fit=crop&q=80', unit: 'Rolls' },
-      { id: '4', name: 'Brass Mandap Pillars', category: 'Wedding Decor & Props', total: 16, out: 8, maintenance: 0, image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=300&auto=format&fit=crop&q=80', unit: 'Sets' },
-      { id: '5', name: 'Gold Mirror Island Bar', category: 'Bar Structures', total: 4, out: 2, maintenance: 0, image: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=300&auto=format&fit=crop&q=80', unit: 'Units' },
-      { id: '6', name: 'Crystal Chandelier (Large)', category: 'Detailing Props', total: 12, out: 4, maintenance: 1, image: 'https://images.unsplash.com/photo-1543198181-e619b692b11c?w=300&auto=format&fit=crop&q=80', unit: 'Pcs' },
-    ];
-
-    const INITIAL_EVENTS = [
-      { id: 'evt-101', name: 'Sharma Destination Wedding', venue: 'Grand Hyatt, Goa', date: '2026-09-12', status: 'Active' },
-      { id: 'evt-102', name: 'Sunburn Pre-Party Setup', venue: 'Vagator Beach Club', date: '2026-09-18', status: 'Upcoming' },
+      { 
+        id: 'INV-1001', 
+        name: 'Staging Angle Ply (8x4 ft)', 
+        category: 'Staging & Trusses', 
+        total: 100, out: 15, maintenance: 2, 
+        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Pcs',
+        rackLocation: 'Zone A - Rack 04',
+        serialNo: 'DM-STG-2024-01',
+        purchaseCost: 4500,
+        condition: 'Good',
+        description: 'Heavy duty waterproof marine plywood staging deck with steel borders.'
+      },
+      { 
+        id: 'INV-1002', 
+        name: 'Aluminum Box Truss (10ft)', 
+        category: 'Staging & Trusses', 
+        total: 40, out: 12, maintenance: 1, 
+        image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Pcs',
+        rackLocation: 'Zone A - Rack 12',
+        serialNo: 'DM-TRS-1099',
+        purchaseCost: 12000,
+        condition: 'Excellent',
+        description: '300x300mm aluminum square box truss with spigot connectors.'
+      },
+      { 
+        id: 'INV-1003', 
+        name: 'Royal Velvet Drapes (Maroon)', 
+        category: 'Fabrics & Drapes', 
+        total: 60, out: 20, maintenance: 0, 
+        image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Rolls',
+        rackLocation: 'Fabric Vault B',
+        serialNo: 'DM-DRP-8821',
+        purchaseCost: 2800,
+        condition: 'Fair',
+        description: '300 GSM fire-retardant rich velvet fabric for main stage backdrops.'
+      },
+      { 
+        id: 'INV-1004', 
+        name: 'Brass Mandap Pillars', 
+        category: 'Wedding Decor & Props', 
+        total: 16, out: 8, maintenance: 0, 
+        image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&auto=format&fit=crop&q=80', 
+        unit: 'Sets',
+        rackLocation: 'Zone C - Display Bay',
+        serialNo: 'DM-MDP-004',
+        purchaseCost: 35000,
+        condition: 'Excellent',
+        description: 'Handcrafted antique finished solid brass carved pillars (8ft height).'
+      }
     ];
 
     const INITIAL_WORKERS = [
-      { id: 'w1', name: 'Ramesh Kumar', type: 'Permanent', role: 'Stage Crew', status: 'Present', dailyWage: 800 },
-      { id: 'w2', name: 'Suresh Naik', type: 'Contractor', role: 'Fabric Decorator', status: 'Present', dailyWage: 950 },
-      { id: 'w3', name: 'Anil Gawde', type: 'Freelancer', role: 'Lighting Tech', status: 'Absent', dailyWage: 1200 },
+      { id: 'WRK-001', name: 'Ramesh Kumar', type: 'Permanent', role: 'Lead Stage Crew', status: 'Present', dailyWage: 950, phone: '+91 98765 43210', activeSite: 'Taj Palace Grand Ballroom' },
+      { id: 'WRK-002', name: 'Suresh Naik', type: 'Contractor', role: 'Fabric Decorator', status: 'Present', dailyWage: 1100, phone: '+91 98765 43211', activeSite: 'JW Marriott Lawn' },
+      { id: 'WRK-003', name: 'Amit Sharma', type: 'Freelancer', role: 'Rigging Engineer', status: 'Absent', dailyWage: 1500, phone: '+91 98765 43212', activeSite: 'None' }
+    ];
+
+    const INITIAL_PROJECTS = [
+      { id: 'PRJ-501', clientName: 'Singhania Wedding', location: 'Grand Hyatt Lawn', eventDate: '2026-10-15', status: 'In Progress', allocatedItems: [{ itemId: 'INV-1001', qty: 10 }, { itemId: 'INV-1004', qty: 4 }] },
+      { id: 'PRJ-502', clientName: 'Tech Summit 2026', location: 'Exhibition Center - Hall 3', eventDate: '2026-11-02', status: 'Upcoming', allocatedItems: [] }
     ];
 
     function App() {
+      // --- APP STATE ---
       const [currentUser, setCurrentUser] = useState(null);
       const [loginRole, setLoginRole] = useState('owner');
       const [pinInput, setPinInput] = useState('');
 
-      const [rolePins, setRolePins] = useState(() => {
-        const saved = localStorage.getItem('dm_pins_v2');
-        return saved ? JSON.parse(saved) : DEFAULT_PINS;
-      });
-
+      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v4')) || DEFAULT_PINS);
+      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v4') || null);
+      
       const [activeTab, setActiveTab] = useState('dashboard');
-      const [inventory, setInventory] = useState(() => {
-        const saved = localStorage.getItem('dm_inventory_v2');
-        return saved ? JSON.parse(saved) : INITIAL_INVENTORY;
-      });
-      const [events, setEvents] = useState(() => {
-        const saved = localStorage.getItem('dm_events_v2');
-        return saved ? JSON.parse(saved) : INITIAL_EVENTS;
-      });
-      const [workers, setWorkers] = useState(() => {
-        const saved = localStorage.getItem('dm_workers_v2');
-        return saved ? JSON.parse(saved) : INITIAL_WORKERS;
-      });
+      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v4')) || INITIAL_INVENTORY);
+      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v4')) || INITIAL_WORKERS);
+      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v4')) || INITIAL_PROJECTS);
+      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v4')) || []);
 
+      // Filter States
       const [selectedCategory, setSelectedCategory] = useState('All');
       const [searchTerm, setSearchTerm] = useState('');
-      const [selectedEventId, setSelectedEventId] = useState(INITIAL_EVENTS[0].id);
       
-      // Editing item modal state
+      // Modals / Item Editing
       const [editingItem, setEditingItem] = useState(null);
-      const [newItem, setNewItem] = useState({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', image: '' });
+      const [viewingDetailItem, setViewingDetailItem] = useState(null);
+      const [selectedProjectForDispatch, setSelectedProjectForDispatch] = useState(projects[0]?.id || '');
+      
+      const [newItem, setNewItem] = useState({
+        name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs',
+        rackLocation: '', serialNo: '', purchaseCost: '', condition: 'Good', description: '', image: ''
+      });
 
-      // Worker form state
-      const [newWorker, setNewWorker] = useState({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800 });
+      const [newWorker, setNewWorker] = useState({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800, phone: '', activeSite: 'None' });
+      const [newProject, setNewProject] = useState({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
 
-      useEffect(() => { localStorage.setItem('dm_inventory_v2', JSON.stringify(inventory)); }, [inventory]);
-      useEffect(() => { localStorage.setItem('dm_events_v2', JSON.stringify(events)); }, [events]);
-      useEffect(() => { localStorage.setItem('dm_workers_v2', JSON.stringify(workers)); }, [workers]);
-      useEffect(() => { localStorage.setItem('dm_pins_v2', JSON.stringify(rolePins)); }, [rolePins]);
+      // Synchronize LocalStorage
+      useEffect(() => { localStorage.setItem('dm_inventory_v4', JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem('dm_workers_v4', JSON.stringify(workers)); }, [workers]);
+      useEffect(() => { localStorage.setItem('dm_projects_v4', JSON.stringify(projects)); }, [projects]);
+      useEffect(() => { localStorage.setItem('dm_logs_v4', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
+      useEffect(() => { localStorage.setItem('dm_pins_v4', JSON.stringify(rolePins)); }, [rolePins]);
+      useEffect(() => { if (appLogo) localStorage.setItem('dm_app_logo_v4', appLogo); }, [appLogo]);
 
+      // Category Definitions
       const categories = ['All', 'Staging & Trusses', 'Wedding Decor & Props', 'Fabrics & Drapes', 'Bar Structures', 'Detailing Props'];
 
+      // --- PERMISSION RIGID RULES ---
+      const isOwner = currentUser?.role === 'owner';
+      const isFactory = currentUser?.role === 'factory_staff';
+      const isOffice = currentUser?.role === 'office_staff';
+      const isPlanner = currentUser?.role === 'planner';
+
+      const canManageInventory = isOwner || isFactory;
+      const canManageLabor = isOwner || isOffice;
+      const canManageSettings = isOwner;
+      const canCreateProjects = isOwner || isPlanner;
+
+      // File helper to convert local images to Base64 strings
+      const convertFileToBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+
+      // Photo Upload Handlers
+      const handleLogoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (file) setAppLogo(await convertFileToBase64(file));
+      };
+
+      const handleNewItemPhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (file) setNewItem({ ...newItem, image: await convertFileToBase64(file) });
+      };
+
+      const handleEditItemPhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (file && editingItem) setEditingItem({ ...editingItem, image: await convertFileToBase64(file) });
+      };
+
+      // Authentication Handler
       const handleLogin = (e) => {
         e.preventDefault();
         if (rolePins[loginRole] === pinInput) {
           setCurrentUser({ role: loginRole, title: getRoleTitle(loginRole) });
           setPinInput('');
-          setActiveTab('dashboard');
+          if (loginRole === 'factory_staff') setActiveTab('catalog');
+          else if (loginRole === 'office_staff') setActiveTab('labor');
+          else setActiveTab('dashboard');
         } else {
-          alert('Incorrect PIN! Check default PIN hints at bottom.');
+          alert('Security Access Denied: Invalid Authentication PIN.');
         }
       };
 
       function getRoleTitle(r) {
-        if (r === 'owner') return '👑 Owner / Director';
-        if (r === 'planner') return '📋 Event Planner';
-        if (r === 'factory_staff') return '🏭 Factory Manager';
-        if (r === 'office_staff') return '💼 Office Staff';
-        return 'User';
+        if (r === 'owner') return '👑 Owner / Managing Director';
+        if (r === 'planner') return '📋 Event Director & Planner';
+        if (r === 'factory_staff') return '🏭 Warehouse & Operations Manager';
+        if (r === 'office_staff') return '💼 Office Administrator & HR';
+        return 'System Operator';
       }
 
-      // Counts & Stats
+      // Calculations & Aggregation
       const totalStock = useMemo(() => inventory.reduce((a, b) => a + Number(b.total), 0), [inventory]);
-      const totalOut = useMemo(() => inventory.reduce((a, b) => a + Number(a.out || b.out), 0), [inventory]);
-      const totalMaint = useMemo(() => inventory.reduce((a, b) => a + Number(a.maintenance || b.maintenance), 0), [inventory]);
+      const totalOut = useMemo(() => inventory.reduce((a, b) => a + Number(b.out || 0), 0), [inventory]);
+      const totalMaint = useMemo(() => inventory.reduce((a, b) => a + Number(b.maintenance || 0), 0), [inventory]);
       const totalAvailable = totalStock - totalOut - totalMaint;
+      const assetValuation = useMemo(() => inventory.reduce((a, b) => a + (Number(b.purchaseCost || 0) * Number(b.total)), 0), [inventory]);
 
       const filteredInventory = useMemo(() => {
         return inventory.filter(item => {
           const matchCat = selectedCategory === 'All' || item.category === selectedCategory;
-          const matchSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              (item.serialNo && item.serialNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                              (item.rackLocation && item.rackLocation.toLowerCase().includes(searchTerm.toLowerCase()));
           return matchCat && matchSearch;
         });
       }, [inventory, selectedCategory, searchTerm]);
 
-      // Actions
-      const updateStock = (id, field, delta) => {
+      // Stock Movement Handler
+      const handleStockAction = (id, field, delta, targetProject = 'General Site') => {
+        if (!canManageInventory) return;
         setInventory(prev => prev.map(item => {
           if (item.id === id) {
-            const newVal = Math.max(0, (item[field] || 0) + delta);
+            const currentVal = item[field] || 0;
+            const newVal = Math.max(0, currentVal + delta);
+            
+            // Log movement history
+            const logEntry = {
+              id: 'LOG-' + Date.now(),
+              timestamp: new Date().toLocaleString(),
+              itemName: item.name,
+              itemId: item.id,
+              action: delta > 0 ? `DEPLOY (+${delta})` : `RETURN (${delta})`,
+              project: targetProject,
+              operator: currentUser.title
+            };
+            setDispatchLogs(logs => [logEntry, ...logs]);
+
             return { ...item, [field]: newVal };
           }
           return item;
         }));
       };
 
+      // Add New Item
       const handleSaveNewItem = (e) => {
         e.preventDefault();
-        if (!newItem.name) return;
+        if (!canManageInventory || !newItem.name) return;
         const item = {
           ...newItem,
-          id: 'item_' + Date.now(),
+          id: 'INV-' + (1000 + inventory.length + 1),
           total: Number(newItem.total),
           out: 0,
           maintenance: 0,
-          image: newItem.image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80'
+          purchaseCost: Number(newItem.purchaseCost) || 0,
+          image: newItem.image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80'
         };
         setInventory([...inventory, item]);
-        setNewItem({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', image: '' });
+        setNewItem({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '', serialNo: '', purchaseCost: '', condition: 'Good', description: '', image: '' });
       };
 
       const handleUpdateItem = (e) => {
         e.preventDefault();
+        if (!canManageInventory) return;
         setInventory(inventory.map(i => i.id === editingItem.id ? editingItem : i));
         setEditingItem(null);
       };
 
       const handleDeleteItem = (id) => {
-        if (confirm('Delete this item from catalog?')) {
+        if (!canManageInventory) return;
+        if (confirm('Permanently purge this item from system records?')) {
           setInventory(inventory.filter(i => i.id !== id));
         }
       };
 
       const handleAddWorker = (e) => {
         e.preventDefault();
-        if (!newWorker.name) return;
-        setWorkers([...workers, { ...newWorker, id: 'w_' + Date.now(), status: 'Present', dailyWage: Number(newWorker.dailyWage) }]);
-        setNewWorker({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800 });
+        if (!canManageLabor || !newWorker.name) return;
+        setWorkers([...workers, { ...newWorker, id: 'WRK-' + (100 + workers.length + 1), status: 'Present', dailyWage: Number(newWorker.dailyWage) }]);
+        setNewWorker({ name: '', type: 'Permanent', role: 'Stage Crew', dailyWage: 800, phone: '', activeSite: 'None' });
       };
 
-      const toggleWorkerStatus = (id) => {
-        setWorkers(workers.map(w => w.id === id ? { ...w, status: w.status === 'Present' ? 'Absent' : 'Present' } : w));
+      const handleAddProject = (e) => {
+        e.preventDefault();
+        if (!canCreateProjects || !newProject.clientName) return;
+        setProjects([...projects, { ...newProject, id: 'PRJ-' + (500 + projects.length + 1), allocatedItems: [] }]);
+        setNewProject({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
       };
 
-      // LOGIN SCREEN
+      // -------------------------------------------------------------
+      // RENDER: LOGIN PORTAL
+      // -------------------------------------------------------------
       if (!currentUser) {
         return (
-          <div className="min-h-screen flex items-center justify-center p-4 bg-[#14031D]">
-            <div className="w-full max-w-md bg-[#20072C] border border-purple-800 rounded-3xl p-8 space-y-6 shadow-2xl">
+          <div className="min-h-screen flex items-center justify-center p-4 bg-[#0D0214]">
+            <div className="w-full max-w-md bg-[#1B0626] border border-purple-800/60 rounded-3xl p-8 space-y-6 shadow-2xl backdrop-blur-xl">
               <div className="text-center">
-                <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center text-black font-black text-2xl mx-auto mb-3 shadow-lg shadow-amber-500/20">★</div>
-                <h1 className="text-2xl font-black text-amber-400">D M PRODUCTIONS</h1>
-                <p className="text-xs text-purple-300 font-semibold uppercase tracking-widest mt-1">Access Control Portal</p>
+                {appLogo ? (
+                  <img src={appLogo} className="w-20 h-20 rounded-2xl mx-auto mb-3 object-cover border-2 border-amber-400 shadow-lg shadow-amber-500/10" />
+                ) : (
+                  <div className="w-20 h-20 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-2xl flex items-center justify-center text-black font-black text-3xl mx-auto mb-3 shadow-xl shadow-amber-500/20">★</div>
+                )}
+                <h1 className="text-2xl font-black tracking-tight text-amber-400">D M PRODUCTIONS</h1>
+                <p className="text-[11px] text-purple-300 font-bold uppercase tracking-widest mt-1">Enterprise Asset Portal</p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-purple-300 mb-1">Select Role</label>
-                  <select value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full bg-[#14031D] text-white border border-purple-700 rounded-xl px-4 py-3 text-sm font-semibold">
-                    <option value="owner">👑 Owner / Director</option>
-                    <option value="factory_staff">🏭 Factory Manager & Staff</option>
-                    <option value="planner">📋 Event Planner</option>
-                    <option value="office_staff">💼 Office Staff</option>
+                  <label className="block text-xs font-bold text-purple-300 mb-1.5 uppercase tracking-wider">Access Profile Role</label>
+                  <select value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full bg-[#0D0214] text-white border border-purple-700/80 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-amber-400 transition">
+                    <option value="owner">👑 Owner / Managing Director</option>
+                    <option value="factory_staff">🏭 Factory & Warehouse Manager</option>
+                    <option value="planner">📋 Event Director & Planner</option>
+                    <option value="office_staff">💼 Office Staff & HR</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-purple-300 mb-1">Security PIN</label>
+                  <label className="block text-xs font-bold text-purple-300 mb-1.5 uppercase tracking-wider">Authentication PIN</label>
                   <input
                     type="password"
-                    placeholder="Enter Security PIN"
+                    placeholder="••••"
                     value={pinInput}
                     onChange={e => setPinInput(e.target.value)}
-                    className="w-full bg-[#14031D] text-amber-400 border border-purple-700 rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest"
+                    className="w-full bg-[#0D0214] text-amber-400 border border-purple-700/80 rounded-xl px-4 py-3 text-center text-2xl font-black tracking-[0.5em] focus:outline-none focus:border-amber-400 transition"
                   />
-                  <p className="text-[11px] text-purple-400 text-center mt-2">
-                    Default PINs — Owner: <span className="text-amber-400 font-bold">{rolePins.owner}</span> | Factory: <span className="text-amber-400 font-bold">{rolePins.factory_staff}</span> | Planner: <span className="text-amber-400 font-bold">{rolePins.planner}</span> | Office: <span className="text-amber-400 font-bold">{rolePins.office_staff}</span>
-                  </p>
                 </div>
 
-                <button type="submit" className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-2xl text-base transition">
-                  Unlock Access Portal
+                <button type="submit" className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-black rounded-2xl text-base shadow-lg shadow-amber-500/20 transition duration-200">
+                  AUTHORIZE ACCESS
                 </button>
               </form>
             </div>
@@ -207,100 +321,135 @@
         );
       }
 
-      // MAIN APP
+      // -------------------------------------------------------------
+      // RENDER: MAIN DASHBOARD & OPERATIONAL SYSTEM
+      // -------------------------------------------------------------
       return (
-        <div className="min-h-screen pb-12">
-          {/* Header */}
-          <header className="bg-[#20072C] border-b border-[#3D1152] sticky top-0 z-50 px-6 py-3 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-black font-black text-sm">★</div>
+        <div className="min-h-screen pb-16">
+          {/* Top Operational Header */}
+          <header className="bg-[#1B0626] border-b border-purple-900/60 sticky top-0 z-50 px-6 py-3.5 flex justify-between items-center backdrop-blur-md">
+            <div className="flex items-center gap-3.5">
+              {appLogo ? (
+                <img src={appLogo} className="w-10 h-10 rounded-xl object-cover border border-amber-400" />
+              ) : (
+                <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-black font-black text-lg">★</div>
+              )}
               <div>
-                <h1 className="font-extrabold text-base text-amber-400 leading-none">D M PRODUCTIONS</h1>
-                <p className="text-[10px] text-purple-300 font-semibold">{currentUser.title}</p>
+                <h1 className="font-black text-lg text-amber-400 tracking-tight leading-none">D M PRODUCTIONS</h1>
+                <p className="text-[11px] text-purple-300 font-semibold mt-0.5">{currentUser.title}</p>
               </div>
             </div>
-            <button onClick={() => setCurrentUser(null)} className="px-4 py-2 bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700/50 rounded-xl text-xs font-bold">
-              🔒 Exit Portal
+            <button onClick={() => setCurrentUser(null)} className="px-4 py-2 bg-rose-950/60 hover:bg-rose-900 text-rose-200 border border-rose-800/60 rounded-xl text-xs font-bold transition">
+              🔒 Terminate Session
             </button>
           </header>
 
-          {/* Navigation Bar */}
-          <div className="bg-[#1A0524] border-b border-purple-900/40 px-6 py-2 sticky top-[57px] z-40 flex gap-2 overflow-x-auto">
-            <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dashboard' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}>📊 Dashboard</button>
-            <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'catalog' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}>📦 Catalog & Stock Edit</button>
-            <button onClick={() => setActiveTab('dispatch')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dispatch' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}>🚚 Dispatch OUT</button>
-            <button onClick={() => setActiveTab('return')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'return' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}>📥 Return IN</button>
-            <button onClick={() => setActiveTab('labor')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'labor' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}>👷 Labor & Attendance</button>
-            {currentUser.role === 'owner' && (
-              <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'settings' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}>⚙️ Security PINs</button>
+          {/* Strict Role Navigation Toolbar */}
+          <div className="bg-[#13031C] border-b border-purple-900/40 px-6 py-2.5 sticky top-[63px] z-40 flex gap-2 overflow-x-auto">
+            {!isFactory && (
+              <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dashboard' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📊 Analytics Dashboard</button>
+            )}
+            <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'catalog' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📦 Inventory Catalog & Assets</button>
+            
+            {canManageInventory && (
+              <>
+                <button onClick={() => setActiveTab('dispatch')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dispatch' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>🚚 Site Dispatch Control</button>
+                <button onClick={() => setActiveTab('return')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'return' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>📥 Warehouse Inward Logistics</button>
+              </>
+            )}
+
+            {canManageLabor && (
+              <button onClick={() => setActiveTab('labor')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'labor' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>👷 On-Site Crew & Payroll</button>
+            )}
+
+            {canCreateProjects && (
+              <button onClick={() => setActiveTab('projects')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'projects' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>🎪 Projects & Event Sites</button>
+            )}
+
+            {canManageSettings && (
+              <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'settings' ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-[#20072E] text-purple-200 hover:bg-purple-900/40'}`}>⚙️ System Configuration</button>
             )}
           </div>
 
           <main className="max-w-7xl mx-auto px-6 mt-6 space-y-6">
 
-            {/* TAB: DASHBOARD */}
-            {activeTab === 'dashboard' && (
+            {/* TAB: EXECUTIVE DASHBOARD */}
+            {activeTab === 'dashboard' && !isFactory && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-[#20072C] p-5 rounded-2xl border border-purple-800">
-                    <p className="text-xs text-purple-300 font-bold uppercase">Total Registered Stock</p>
+                {/* Metric Cards Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80">
+                    <p className="text-[11px] text-purple-300 font-bold uppercase">Total Inventory Units</p>
                     <p className="text-3xl font-black text-white mt-1">{totalStock}</p>
                   </div>
-                  <div className="bg-[#20072C] p-5 rounded-2xl border border-emerald-500/40">
-                    <p className="text-xs text-emerald-400 font-bold uppercase">Available in Workshop</p>
+                  <div className="bg-[#1B0626] p-5 rounded-2xl border border-emerald-500/40">
+                    <p className="text-[11px] text-emerald-400 font-bold uppercase">Ready In Warehouse</p>
                     <p className="text-3xl font-black text-emerald-400 mt-1">{totalAvailable}</p>
                   </div>
-                  <div className="bg-[#20072C] p-5 rounded-2xl border border-amber-500/40">
-                    <p className="text-xs text-amber-400 font-bold uppercase">Deployed at Events</p>
+                  <div className="bg-[#1B0626] p-5 rounded-2xl border border-amber-500/40">
+                    <p className="text-[11px] text-amber-400 font-bold uppercase">Deployed At Venues</p>
                     <p className="text-3xl font-black text-amber-400 mt-1">{totalOut}</p>
                   </div>
-                  <div className="bg-[#20072C] p-5 rounded-2xl border border-rose-500/40">
-                    <p className="text-xs text-rose-400 font-bold uppercase">Damaged / Maintenance</p>
+                  <div className="bg-[#1B0626] p-5 rounded-2xl border border-rose-500/40">
+                    <p className="text-[11px] text-rose-400 font-bold uppercase">Under Maintenance</p>
                     <p className="text-3xl font-black text-rose-400 mt-1">{totalMaint}</p>
+                  </div>
+                  <div className="bg-[#1B0626] p-5 rounded-2xl border border-blue-500/40 col-span-2 md:col-span-1">
+                    <p className="text-[11px] text-blue-400 font-bold uppercase">Asset Valuation</p>
+                    <p className="text-2xl font-black text-blue-300 mt-1">₹{assetValuation.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
 
-                <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 space-y-4">
-                  <h3 className="text-lg font-bold text-amber-400">Overview Inventory Breakdown</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {inventory.map(item => {
-                      const avail = item.total - item.out - item.maintenance;
-                      return (
-                        <div key={item.id} className="bg-[#14031D] p-4 rounded-xl border border-purple-900/60 flex items-center justify-between">
+                {/* Dispatch Logs Audit Trail */}
+                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                  <h3 className="text-lg font-bold text-amber-400 flex items-center justify-between">
+                    <span>📜 Real-Time Dispatch & Logistics Movement History</span>
+                    <span className="text-xs font-normal text-purple-300">{dispatchLogs.length} Records Logged</span>
+                  </h3>
+
+                  <div className="max-h-80 overflow-y-auto space-y-2.5 pr-2">
+                    {dispatchLogs.length === 0 ? (
+                      <p className="text-xs text-purple-400 py-4 text-center">No recent material movements recorded in this session.</p>
+                    ) : (
+                      dispatchLogs.map(log => (
+                        <div key={log.id} className="bg-[#0D0214] p-3 rounded-xl border border-purple-900/60 flex justify-between items-center text-xs">
                           <div>
-                            <h4 className="font-bold text-white text-sm">{item.name}</h4>
-                            <p className="text-xs text-purple-400">{item.category}</p>
+                            <span className="font-bold text-white">{log.itemName}</span>
+                            <span className="text-purple-400 mx-2">•</span>
+                            <span className="text-amber-300 font-semibold">{log.project}</span>
                           </div>
-                          <div className="text-right">
-                            <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">{avail} Avail</span>
-                            <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold ml-2">{item.out} Out</span>
+                          <div className="flex items-center gap-4">
+                            <span className={`font-mono font-bold px-2 py-0.5 rounded ${log.action.includes('DEPLOY') ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+                              {log.action}
+                            </span>
+                            <span className="text-purple-400 text-[11px]">{log.timestamp}</span>
                           </div>
                         </div>
-                      );
-                    })}
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB: CATALOG & EDIT */}
+            {/* TAB: CATALOG & ASSETS */}
             {activeTab === 'catalog' && (
               <div className="space-y-6">
-                {/* Search & Category Filter */}
-                <div className="flex flex-col md:flex-row gap-3 justify-between items-center bg-[#20072C] p-4 rounded-2xl border border-purple-800">
+                {/* Search & Category Filter Toolbar */}
+                <div className="flex flex-col md:flex-row gap-3 justify-between items-center bg-[#1B0626] p-4 rounded-2xl border border-purple-800/80">
                   <input
                     type="text"
-                    placeholder="Search catalog items..."
+                    placeholder="Search by Name, Serial No, or Rack Location..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full md:w-72 bg-[#14031D] border border-purple-700 px-4 py-2 rounded-xl text-sm"
+                    className="w-full md:w-96 bg-[#0D0214] border border-purple-700/80 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400"
                   />
                   <div className="flex gap-2 overflow-x-auto w-full md:w-auto">
                     {categories.map(cat => (
                       <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap ${selectedCategory === cat ? 'bg-amber-500 text-black' : 'bg-[#14031D] text-purple-300 border border-purple-800'}`}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${selectedCategory === cat ? 'bg-amber-500 text-black' : 'bg-[#0D0214] text-purple-300 border border-purple-900'}`}
                       >
                         {cat}
                       </button>
@@ -308,76 +457,121 @@
                   </div>
                 </div>
 
-                {/* Add New Item Form */}
-                <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 space-y-4">
-                  <h3 className="text-lg font-bold text-amber-400">➕ Add New Item to Catalog</h3>
-                  <form onSubmit={handleSaveNewItem} className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <input type="text" placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm" />
-                    <select value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm">
-                      {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <input type="number" placeholder="Total Workshop Stock" value={newItem.total} onChange={e => setNewItem({...newItem, total: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm" />
-                    <input type="text" placeholder="Image URL (Optional)" value={newItem.image} onChange={e => setNewItem({...newItem, image: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm" />
-                    <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold p-3 rounded-xl text-sm">+ Save Item</button>
-                  </form>
-                </div>
-
-                {/* Edit Item Modal */}
-                {editingItem && (
-                  <div className="bg-[#2A093B] p-6 rounded-2xl border-2 border-amber-500 space-y-4">
-                    <h3 className="text-lg font-bold text-amber-400">✏️ Edit Details: {editingItem.name}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                {/* Add New Detailed Item Form (Restricted) */}
+                {canManageInventory && (
+                  <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                    <h3 className="text-lg font-bold text-amber-400">➕ Register New Inventory & Asset Record</h3>
+                    <form onSubmit={handleSaveNewItem} className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <label className="text-xs text-purple-300 font-bold">Item Name</label>
-                        <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-[#14031D] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
+                        <input type="text" required placeholder="e.g. Sharpy Beam Light 15R" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Category</label>
+                        <select value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1">
+                          {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Total Stock Quantity</label>
+                        <input type="number" required min="1" value={newItem.total} onChange={e => setNewItem({...newItem, total: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Warehouse Rack Location</label>
+                        <input type="text" placeholder="e.g. Zone B - Bay 02" value={newItem.rackLocation} onChange={e => setNewItem({...newItem, rackLocation: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Serial / Identification No</label>
+                        <input type="text" placeholder="e.g. DM-LIGHT-99" value={newItem.serialNo} onChange={e => setNewItem({...newItem, serialNo: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Purchase Unit Cost (₹)</label>
+                        <input type="number" placeholder="25000" value={newItem.purchaseCost} onChange={e => setNewItem({...newItem, purchaseCost: e.target.value})} className="w-full bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Upload Custom Profile Image</label>
+                        <input type="file" accept="image/*" onChange={handleNewItemPhotoUpload} className="w-full bg-[#0D0214] p-2 rounded-xl border border-purple-700/80 text-xs mt-1" />
+                      </div>
+                      <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-black p-3 rounded-xl text-sm self-end transition">
+                        + Save Asset Record
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {/* Edit Modal / Panel */}
+                {canManageInventory && editingItem && (
+                  <div className="bg-[#260833] p-6 rounded-2xl border-2 border-amber-500 space-y-4 shadow-2xl">
+                    <h3 className="text-lg font-bold text-amber-400">✏️ Modify Asset Specifications & Metadata: {editingItem.name}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Item Name</label>
+                        <input type="text" value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-[#0D0214] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
                       </div>
                       <div>
                         <label className="text-xs text-purple-300 font-bold">Total Stock</label>
-                        <input type="number" value={editingItem.total} onChange={e => setEditingItem({...editingItem, total: Number(e.target.value)})} className="w-full bg-[#14031D] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
+                        <input type="number" value={editingItem.total} onChange={e => setEditingItem({...editingItem, total: Number(e.target.value)})} className="w-full bg-[#0D0214] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
                       </div>
                       <div>
-                        <label className="text-xs text-purple-300 font-bold">Damaged/Maintenance</label>
-                        <input type="number" value={editingItem.maintenance} onChange={e => setEditingItem({...editingItem, maintenance: Number(e.target.value)})} className="w-full bg-[#14031D] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
+                        <label className="text-xs text-purple-300 font-bold">Rack Location</label>
+                        <input type="text" value={editingItem.rackLocation || ''} onChange={e => setEditingItem({...editingItem, rackLocation: e.target.value})} className="w-full bg-[#0D0214] p-2.5 rounded-xl text-sm border border-purple-700 mt-1" />
                       </div>
-                      <div className="flex gap-2 items-end">
-                        <button onClick={handleUpdateItem} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold p-2.5 rounded-xl text-sm">Save</button>
-                        <button onClick={() => setEditingItem(null)} className="w-full bg-purple-900 hover:bg-purple-800 text-purple-200 font-bold p-2.5 rounded-xl text-sm">Cancel</button>
+                      <div>
+                        <label className="text-xs text-purple-300 font-bold">Update Profile Photo</label>
+                        <input type="file" accept="image/*" onChange={handleEditItemPhotoUpload} className="w-full bg-[#0D0214] p-1.5 rounded-xl text-xs border border-purple-700 mt-1" />
                       </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button onClick={handleUpdateItem} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs">Save Updates</button>
+                      <button onClick={() => setEditingItem(null)} className="bg-purple-900 hover:bg-purple-800 text-purple-200 font-bold px-6 py-2.5 rounded-xl text-xs">Cancel</button>
                     </div>
                   </div>
                 )}
 
-                {/* Catalog Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Catalog Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {filteredInventory.map(item => {
                     const avail = item.total - item.out - item.maintenance;
                     return (
-                      <div key={item.id} className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/80 flex flex-col justify-between">
+                      <div key={item.id} className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80 flex flex-col justify-between hover:border-purple-600/80 transition">
                         <div>
-                          <img src={item.image} className="w-full h-36 object-cover rounded-xl mb-3 border border-purple-900" />
+                          <div className="relative">
+                            <img src={item.image} className="w-full h-48 object-cover rounded-xl mb-3 border border-purple-900" />
+                            <span className="absolute top-2 right-2 bg-black/80 backdrop-blur-md border border-amber-400/40 text-amber-300 text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg">
+                              {item.id}
+                            </span>
+                          </div>
+
                           <span className="text-[10px] uppercase tracking-wider font-extrabold text-amber-400">{item.category}</span>
-                          <h4 className="font-bold text-white text-base mt-0.5">{item.name}</h4>
-                          
-                          <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-                            <div className="bg-[#14031D] p-2 rounded-xl border border-purple-900">
-                              <p className="text-[10px] text-purple-400">Total</p>
-                              <p className="font-bold text-sm text-white">{item.total}</p>
+                          <h4 className="font-extrabold text-white text-base mt-0.5">{item.name}</h4>
+                          <p className="text-xs text-purple-300 font-mono mt-1">📍 {item.rackLocation || 'Unassigned Rack'} | SN: {item.serialNo || 'N/A'}</p>
+
+                          <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                            <div className="bg-[#0D0214] p-2 rounded-xl border border-purple-900">
+                              <p className="text-[10px] text-purple-400 font-bold uppercase">Total</p>
+                              <p className="font-black text-sm text-white">{item.total}</p>
                             </div>
-                            <div className="bg-[#14031D] p-2 rounded-xl border border-purple-900">
-                              <p className="text-[10px] text-emerald-400">Avail</p>
-                              <p className="font-bold text-sm text-emerald-400">{avail}</p>
+                            <div className="bg-[#0D0214] p-2 rounded-xl border border-purple-900">
+                              <p className="text-[10px] text-emerald-400 font-bold uppercase">Ready</p>
+                              <p className="font-black text-sm text-emerald-400">{avail}</p>
                             </div>
-                            <div className="bg-[#14031D] p-2 rounded-xl border border-purple-900">
-                              <p className="text-[10px] text-amber-400">Out</p>
-                              <p className="font-bold text-sm text-amber-400">{item.out}</p>
+                            <div className="bg-[#0D0214] p-2 rounded-xl border border-purple-900">
+                              <p className="text-[10px] text-amber-400 font-bold uppercase">On Site</p>
+                              <p className="font-black text-sm text-amber-400">{item.out}</p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex gap-2 mt-4">
-                          <button onClick={() => setEditingItem(item)} className="flex-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 p-2.5 rounded-xl text-xs font-bold border border-amber-500/40">✏️ Edit Details</button>
-                          <button onClick={() => handleDeleteItem(item.id)} className="bg-rose-900/40 hover:bg-rose-900/80 text-rose-300 p-2.5 rounded-xl text-xs font-bold border border-rose-800">🗑️ Delete</button>
-                        </div>
+                        {canManageInventory && (
+                          <div className="flex gap-2 mt-4 pt-3 border-t border-purple-900/60">
+                            <button onClick={() => setEditingItem(item)} className="flex-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 p-2.5 rounded-xl text-xs font-bold border border-amber-500/30 transition">
+                              📷 Edit Details & Photo
+                            </button>
+                            <button onClick={() => handleDeleteItem(item.id)} className="bg-rose-950/60 hover:bg-rose-900 text-rose-300 p-2.5 rounded-xl text-xs font-bold border border-rose-800/60 transition">
+                              🗑️
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -385,23 +579,49 @@
               </div>
             )}
 
-            {/* TAB: DISPATCH OUT */}
-            {activeTab === 'dispatch' && (
-              <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 space-y-6">
-                <h3 className="text-xl font-bold text-amber-400">🚚 Dispatch Inventory (Workshop ➔ Site)</h3>
+            {/* TAB: SITE DISPATCH LOGISTICS */}
+            {activeTab === 'dispatch' && canManageInventory && (
+              <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-6">
+                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-purple-900/60 pb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-amber-400">🚚 Warehouse Material Dispatch (Workshop ➔ Event Site)</h3>
+                    <p className="text-xs text-purple-300 mt-0.5">Select a destination venue project and dispatch inventory items.</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-purple-300 font-bold">Destination Event Site:</label>
+                    <select 
+                      value={selectedProjectForDispatch} 
+                      onChange={e => setSelectedProjectForDispatch(e.target.value)}
+                      className="bg-[#0D0214] text-amber-300 font-bold border border-purple-700 px-4 py-2 rounded-xl text-xs"
+                    >
+                      {projects.map(p => <option key={p.id} value={p.clientName + ' (' + p.location + ')'}>{p.clientName} - {p.location}</option>)}
+                      <option value="General On-Site Stock">General On-Site Stock</option>
+                    </select>
+                  </div>
+                </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {inventory.map(item => {
                     const avail = item.total - item.out - item.maintenance;
                     return (
-                      <div key={item.id} className="bg-[#14031D] p-4 rounded-xl border border-purple-900 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div>
-                          <h4 className="font-bold text-white text-base">{item.name}</h4>
-                          <p className="text-xs text-purple-400">Available to dispatch: <span className="text-emerald-400 font-bold">{avail} {item.unit}</span> | Currently Out: <span className="text-amber-400 font-bold">{item.out}</span></p>
+                      <div key={item.id} className="bg-[#0D0214] p-4 rounded-xl border border-purple-900/80 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-3.5">
+                          <img src={item.image} className="w-14 h-14 rounded-xl object-cover border border-purple-800" />
+                          <div>
+                            <h4 className="font-extrabold text-white text-base">{item.name}</h4>
+                            <p className="text-xs text-purple-400">
+                              Available in Warehouse: <span className="text-emerald-400 font-bold">{avail} {item.unit}</span> | Currently Deployed: <span className="text-amber-400 font-bold">{item.out} {item.unit}</span>
+                            </p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => updateStock(item.id, 'out', 1)} disabled={avail <= 0} className="px-4 py-2 bg-amber-500 disabled:opacity-30 text-black font-extrabold rounded-xl text-sm">+ Dispatch 1</button>
-                          <button onClick={() => updateStock(item.id, 'out', 5)} disabled={avail < 5} className="px-4 py-2 bg-amber-500 disabled:opacity-30 text-black font-extrabold rounded-xl text-sm">+ Dispatch 5</button>
+                          <button onClick={() => handleStockAction(item.id, 'out', 1, selectedProjectForDispatch)} disabled={avail <= 0} className="px-4 py-2.5 bg-amber-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-amber-400 transition">
+                            + Dispatch 1 Unit
+                          </button>
+                          <button onClick={() => handleStockAction(item.id, 'out', 5, selectedProjectForDispatch)} disabled={avail < 5} className="px-4 py-2.5 bg-amber-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-amber-400 transition">
+                            + Dispatch 5 Units
+                          </button>
                         </div>
                       </div>
                     );
@@ -410,21 +630,27 @@
               </div>
             )}
 
-            {/* TAB: RETURN IN */}
-            {activeTab === 'return' && (
-              <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 space-y-6">
-                <h3 className="text-xl font-bold text-amber-400">📥 Receive Inventory Return (Site ➔ Workshop)</h3>
-                
-                <div className="space-y-4">
+            {/* TAB: WAREHOUSE INWARD LOGISTICS */}
+            {activeTab === 'return' && canManageInventory && (
+              <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-6">
+                <h3 className="text-xl font-bold text-amber-400">📥 Return Logistics Inward (Event Site ➔ Warehouse)</h3>
+                <div className="space-y-3">
                   {inventory.map(item => (
-                    <div key={item.id} className="bg-[#14031D] p-4 rounded-xl border border-purple-900 flex flex-col md:flex-row justify-between items-center gap-4">
-                      <div>
-                        <h4 className="font-bold text-white text-base">{item.name}</h4>
-                        <p className="text-xs text-purple-400">Currently Deployed at Sites: <span className="text-amber-400 font-bold">{item.out} {item.unit}</span></p>
+                    <div key={item.id} className="bg-[#0D0214] p-4 rounded-xl border border-purple-900/80 flex flex-col md:flex-row justify-between items-center gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <img src={item.image} className="w-14 h-14 rounded-xl object-cover border border-purple-800" />
+                        <div>
+                          <h4 className="font-extrabold text-white text-base">{item.name}</h4>
+                          <p className="text-xs text-purple-400">Deployed at Active Venues: <span className="text-amber-400 font-bold">{item.out} {item.unit}</span></p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => updateStock(item.id, 'out', -1)} disabled={item.out <= 0} className="px-4 py-2 bg-emerald-500 disabled:opacity-30 text-black font-extrabold rounded-xl text-sm">Return 1</button>
-                        <button onClick={() => updateStock(item.id, 'out', -5)} disabled={item.out < 5} className="px-4 py-2 bg-emerald-500 disabled:opacity-30 text-black font-extrabold rounded-xl text-sm">Return 5</button>
+                        <button onClick={() => handleStockAction(item.id, 'out', -1, 'Warehouse Return')} disabled={item.out <= 0} className="px-4 py-2.5 bg-emerald-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-emerald-400 transition">
+                          Return 1 Unit
+                        </button>
+                        <button onClick={() => handleStockAction(item.id, 'out', -5, 'Warehouse Return')} disabled={item.out < 5} className="px-4 py-2.5 bg-emerald-500 disabled:opacity-30 text-black font-black rounded-xl text-xs hover:bg-emerald-400 transition">
+                          Return 5 Units
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -432,38 +658,41 @@
               </div>
             )}
 
-            {/* TAB: LABOR & ATTENDANCE */}
-            {activeTab === 'labor' && (
+            {/* TAB: ON-SITE LABOR & ATTENDANCE */}
+            {activeTab === 'labor' && canManageLabor && (
               <div className="space-y-6">
-                <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 space-y-4">
-                  <h3 className="text-lg font-bold text-amber-400">👷 Add On-Site Crew / Staff</h3>
+                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                  <h3 className="text-lg font-bold text-amber-400">👷 Workforce Registration & Wage Management</h3>
                   <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <input type="text" placeholder="Worker Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm" />
-                    <select value={newWorker.type} onChange={e => setNewWorker({...newWorker, type: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm">
-                      <option value="Permanent">Permanent</option>
-                      <option value="Contractor">Contractor</option>
-                      <option value="Freelancer">Freelancer</option>
+                    <input type="text" required placeholder="Full Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                    <select value={newWorker.type} onChange={e => setNewWorker({...newWorker, type: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm">
+                      <option value="Permanent">Permanent Staff</option>
+                      <option value="Contractor">Contractor Crew</option>
+                      <option value="Freelancer">Freelance Technician</option>
                     </select>
-                    <input type="text" placeholder="Role (e.g. Stage Crew)" value={newWorker.role} onChange={e => setNewWorker({...newWorker, role: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm" />
-                    <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#14031D] p-3 rounded-xl border border-purple-700 text-sm" />
-                    <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold p-3 rounded-xl text-sm">+ Add Worker</button>
+                    <input type="text" placeholder="Designation / Skill" value={newWorker.role} onChange={e => setNewWorker({...newWorker, role: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                    <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                    <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-black p-3 rounded-xl text-sm transition">+ Enroll Staff</button>
                   </form>
                 </div>
 
-                <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 space-y-4">
-                  <h3 className="text-lg font-bold text-amber-400">Daily Attendance Tracker</h3>
+                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                  <h3 className="text-lg font-bold text-amber-400">Daily Attendance & Roster Deployment</h3>
                   <div className="space-y-3">
                     {workers.map(w => (
-                      <div key={w.id} className="bg-[#14031D] p-4 rounded-xl border border-purple-900 flex justify-between items-center">
+                      <div key={w.id} className="bg-[#0D0214] p-4 rounded-xl border border-purple-900/80 flex justify-between items-center">
                         <div>
-                          <h4 className="font-bold text-white text-sm">{w.name}</h4>
-                          <p className="text-xs text-purple-400">{w.type} • {w.role} • Rate: ₹{w.dailyWage}/day</p>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-extrabold text-white text-sm">{w.name}</h4>
+                            <span className="text-[10px] font-mono text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">{w.id}</span>
+                          </div>
+                          <p className="text-xs text-purple-400 mt-0.5">{w.type} • {w.role} • Rate: ₹{w.dailyWage}/day</p>
                         </div>
                         <button
-                          onClick={() => toggleWorkerStatus(w.id)}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold transition ${w.status === 'Present' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-900/30 text-rose-400 border border-rose-800'}`}
+                          onClick={() => setWorkers(workers.map(item => item.id === w.id ? { ...item, status: item.status === 'Present' ? 'Absent' : 'Present' } : item))}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition ${w.status === 'Present' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-950/40 text-rose-400 border border-rose-800'}`}
                         >
-                          {w.status === 'Present' ? '✓ Present' : '✗ Absent'}
+                          {w.status === 'Present' ? '✓ Present On Site' : '✗ Marked Absent'}
                         </button>
                       </div>
                     ))}
@@ -472,23 +701,65 @@
               </div>
             )}
 
-            {/* TAB: SECURITY SETTINGS */}
-            {activeTab === 'settings' && currentUser.role === 'owner' && (
-              <div className="bg-[#20072C] p-6 rounded-2xl border border-purple-800 max-w-md space-y-4">
-                <h3 className="text-lg font-bold text-amber-400">⚙️ Change Access Security PINs</h3>
-                <p className="text-xs text-purple-300">Modifications save instantly to your browser memory.</p>
-                
-                {Object.keys(rolePins).map(role => (
-                  <div key={role} className="flex items-center justify-between bg-[#14031D] p-3 rounded-xl border border-purple-900">
-                    <span className="text-sm font-bold capitalize text-white">{role.replace('_', ' ')}</span>
-                    <input
-                      type="text"
-                      value={rolePins[role]}
-                      onChange={e => setRolePins({ ...rolePins, [role]: e.target.value })}
-                      className="bg-[#20072C] text-amber-400 font-mono font-black px-3 py-1.5 rounded-lg border border-purple-700 w-24 text-center text-base"
-                    />
+            {/* TAB: PROJECTS & EVENT SITES */}
+            {activeTab === 'projects' && canCreateProjects && (
+              <div className="space-y-6">
+                <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                  <h3 className="text-lg font-bold text-amber-400">🎪 Create New Event Venue Site</h3>
+                  <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" required placeholder="Client / Event Name" value={newProject.clientName} onChange={e => setNewProject({...newProject, clientName: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                    <input type="text" placeholder="Venue Location" value={newProject.location} onChange={e => setNewProject({...newProject, location: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
+                    <input type="date" value={newProject.eventDate} onChange={e => setNewProject({...newProject, eventDate: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm text-white" />
+                    <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-black font-black p-3 rounded-xl text-sm transition">+ Register Site</button>
+                  </form>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {projects.map(prj => (
+                    <div key={prj.id} className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="text-[10px] font-mono font-bold text-amber-400">{prj.id}</span>
+                          <h4 className="font-extrabold text-white text-lg">{prj.clientName}</h4>
+                          <p className="text-xs text-purple-300">📍 {prj.location}</p>
+                        </div>
+                        <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-900/60 text-purple-200 border border-purple-700">
+                          {prj.eventDate || 'Date Unscheduled'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: SYSTEM CONFIGURATION */}
+            {activeTab === 'settings' && canManageSettings && (
+              <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 max-w-xl space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-amber-400">📷 Change Company Branding Logo</h3>
+                  <p className="text-xs text-purple-300 mt-1">Upload custom logo image. Persists automatically across browser sessions.</p>
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="mt-3 bg-[#0D0214] p-2.5 rounded-xl border border-purple-700/80 text-xs w-full" />
+                </div>
+
+                <hr className="border-purple-900/80" />
+
+                <div>
+                  <h3 className="text-lg font-bold text-amber-400 mb-3">⚙️ System Access Security PIN Controls</h3>
+                  <div className="space-y-2.5">
+                    {Object.keys(rolePins).map(role => (
+                      <div key={role} className="flex items-center justify-between bg-[#0D0214] p-3.5 rounded-xl border border-purple-900">
+                        <span className="text-sm font-bold capitalize text-white">{role.replace('_', ' ')} Profile</span>
+                        <input
+                          type="text"
+                          value={rolePins[role]}
+                          onChange={e => setRolePins({ ...rolePins, [role]: e.target.value })}
+                          className="bg-[#1B0626] text-amber-400 font-mono font-black px-4 py-1.5 rounded-lg border border-purple-700 w-28 text-center text-base"
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             )}
 
