@@ -3,16 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D M PRODUCTIONS Warehouse & Inventory Tracker</title>
-  <!-- Tailwind CSS CDN -->
+  <title>D M PRODUCTIONS — Warehouse & Workforce Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React & ReactDOM CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <!-- Babel CDN for JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-[#14031D] text-white antialiased selection:bg-amber-500 selection:text-black">
 
@@ -37,8 +32,24 @@
       { id: 'evt-102', name: 'Sunburn Pre-Party Bar Setup', venue: 'Vagator Beach Club', date: '2026-09-18', status: 'Upcoming', dispatches: { '2': 12, '5': 1, '6': 4 } },
     ];
 
+    const INITIAL_WORKERS = [
+      { id: 'w1', name: 'Ramesh Kumar', type: 'Permanent', role: 'Stage Crew', location: 'Warehouse', status: 'Present', dailyWage: 800 },
+      { id: 'w2', name: 'Suresh Naik', type: 'Permanent', role: 'Fabric Decorator', location: 'Warehouse', status: 'Present', dailyWage: 850 },
+      { id: 'w3', name: 'Amit Gade', type: 'Temporary', role: 'Loader/Helper', location: 'Sharma Destination Wedding', status: 'Present', dailyWage: 600 },
+      { id: 'w4', name: 'Prakash Velip', type: 'Temporary', role: 'Rigger', location: 'Sharma Destination Wedding', status: 'Present', dailyWage: 750 },
+    ];
+
     function App() {
-      const [role, setRole] = useState('manager');
+      // User Auth State
+      const [currentUser, setCurrentUser] = useState(() => {
+        const saved = localStorage.getItem('dm_auth_user');
+        return saved ? JSON.parse(saved) : null;
+      });
+
+      const [pinInput, setPinInput] = useState('');
+      const [loginRole, setLoginRole] = useState('factory_staff');
+
+      // Main Data State
       const [activeTab, setActiveTab] = useState('dashboard');
       const [inventory, setInventory] = useState(() => {
         const saved = localStorage.getItem('dm_inventory');
@@ -48,21 +59,59 @@
         const saved = localStorage.getItem('dm_events');
         return saved ? JSON.parse(saved) : INITIAL_EVENTS;
       });
+      const [workers, setWorkers] = useState(() => {
+        const saved = localStorage.getItem('dm_workers');
+        return saved ? JSON.parse(saved) : INITIAL_WORKERS;
+      });
 
+      // Filter & Dispatch States
       const [selectedCategory, setSelectedCategory] = useState('All');
       const [searchTerm, setSearchTerm] = useState('');
       const [selectedEventId, setSelectedEventId] = useState(INITIAL_EVENTS[0].id);
       const [dispatchCart, setDispatchCart] = useState({});
 
-      useEffect(() => {
-        localStorage.setItem('dm_inventory', JSON.stringify(inventory));
-      }, [inventory]);
+      // New Worker Form State
+      const [newWorker, setNewWorker] = useState({ name: '', type: 'Temporary', role: 'Helper', location: 'Warehouse', dailyWage: 600 });
 
-      useEffect(() => {
-        localStorage.setItem('dm_events', JSON.stringify(events));
-      }, [events]);
+      useEffect(() => { localStorage.setItem('dm_inventory', JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem('dm_events', JSON.stringify(events)); }, [events]);
+      useEffect(() => { localStorage.setItem('dm_workers', JSON.stringify(workers)); }, [workers]);
 
       const categories = ['All', 'Staging & Trusses', 'Wedding Decor & Props', 'Fabrics & Drapes', 'Bar Structures', 'Detailing Props', 'Furniture & Lounges'];
+
+      // Login Logic
+      const handleLogin = (e) => {
+        e.preventDefault();
+        const pins = { owner: '1111', planner: '2222', factory_staff: '3333', office_staff: '4444' };
+        if (pins[loginRole] === pinInput) {
+          const user = { role: loginRole, title: getRoleTitle(loginRole) };
+          setCurrentUser(user);
+          localStorage.setItem('dm_auth_user', JSON.stringify(user));
+          setPinInput('');
+          setActiveTab(loginRole === 'office_staff' ? 'attendance' : 'dashboard');
+        } else {
+          alert('Invalid Security PIN for selected role!');
+        }
+      };
+
+      const handleLogout = () => {
+        setCurrentUser(null);
+        localStorage.removeItem('dm_auth_user');
+      };
+
+      function getRoleTitle(r) {
+        if (r === 'owner') return '👑 Owner / Director';
+        if (r === 'planner') return '📋 Event Planner';
+        if (r === 'factory_staff') return '🏭 Factory Manager / Staff';
+        if (r === 'office_staff') return '💼 Office Staff & HR';
+        return 'Staff';
+      }
+
+      // Permissions Check
+      const canAccessInventory = currentUser && ['owner', 'planner', 'factory_staff'].includes(currentUser.role);
+      const canManageInventory = currentUser && ['owner', 'factory_staff'].includes(currentUser.role);
+      const canAccessAttendance = currentUser && ['owner', 'office_staff'].includes(currentUser.role);
+      const canAccessOngoingMode = currentUser && ['owner', 'planner', 'office_staff'].includes(currentUser.role);
 
       // Metrics
       const totalStockCount = useMemo(() => inventory.reduce((acc, item) => acc + item.total, 0), [inventory]);
@@ -85,29 +134,22 @@
 
       const handleConfirmDispatch = () => {
         if (Object.keys(dispatchCart).length === 0) return;
-        
-        // Update Inventory
         setInventory(prev => prev.map(item => {
-          const qtyToDispatch = dispatchCart[item.id] || 0;
-          return { ...item, out: item.out + qtyToDispatch };
+          const qty = dispatchCart[item.id] || 0;
+          return { ...item, out: item.out + qty };
         }));
-
-        // Update Event
         setEvents(prev => prev.map(evt => {
           if (evt.id === selectedEventId) {
-            const updatedDispatches = { ...evt.dispatches };
-            Object.entries(dispatchCart).forEach(([itemId, qty]) => {
-              if (qty > 0) {
-                updatedDispatches[itemId] = (updatedDispatches[itemId] || 0) + qty;
-              }
+            const updated = { ...evt.dispatches };
+            Object.entries(dispatchCart).forEach(([id, qty]) => {
+              if (qty > 0) updated[id] = (updated[id] || 0) + qty;
             });
-            return { ...evt, dispatches: updatedDispatches };
+            return { ...evt, dispatches: updated };
           }
           return evt;
         }));
-
         setDispatchCart({});
-        alert('Dispatch confirmed and synchronized!');
+        alert('Dispatch confirmed successfully!');
       };
 
       const handleExportCSV = () => {
@@ -120,15 +162,84 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `DM_Productions_Inventory_${new Date().toISOString().slice(0,10)}.csv`;
+        a.download = `DM_Inventory_${new Date().toISOString().slice(0,10)}.csv`;
         a.click();
       };
 
       const triggerWhatsAppAlert = (item) => {
         const avail = item.total - item.out - item.maintenance;
-        const msg = encodeURIComponent(`🚨 *DM PRODUCTIONS LOW STOCK ALERT*\n\nItem: ${item.name}\nAvailable in Workshop: ${avail} ${item.unit}\nTotal Stock: ${item.total}\nCurrently Out on Site: ${item.out}\n\nPlease recheck workshop allocation.`);
+        const msg = encodeURIComponent(`🚨 *DM PRODUCTIONS LOW STOCK ALERT*\n\nItem: ${item.name}\nAvailable in Workshop: ${avail} ${item.unit}\nTotal Stock: ${item.total}\nCurrently Out: ${item.out}\n\nPlease check stock allocation.`);
         window.open(`https://wa.me/?text=${msg}`, '_blank');
       };
+
+      const handleAddWorker = (e) => {
+        e.preventDefault();
+        if (!newWorker.name) return;
+        setWorkers(prev => [...prev, { ...newWorker, id: 'w_' + Date.now(), status: 'Present' }]);
+        setNewWorker({ name: '', type: 'Temporary', role: 'Helper', location: 'Warehouse', dailyWage: 600 });
+      };
+
+      const toggleWorkerStatus = (id) => {
+        setWorkers(prev => prev.map(w => w.id === id ? { ...w, status: w.status === 'Present' ? 'Absent' : 'Present' } : w));
+      };
+
+      const updateWorkerLocation = (id, location) => {
+        setWorkers(prev => prev.map(w => w.id === id ? { ...w, location } : w));
+      };
+
+      // LOGIN SCREEN
+      if (!currentUser) {
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#14031D] via-[#20072C] to-[#0D0213]">
+            <div className="w-full max-w-md bg-[#20072C] border border-purple-800/60 rounded-3xl p-8 shadow-2xl space-y-6">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 mx-auto flex items-center justify-center shadow-lg shadow-amber-500/20 mb-3">
+                  <svg className="w-9 h-9 text-[#14031D] fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/>
+                  </svg>
+                </div>
+                <h1 className="text-2xl font-black text-amber-400 tracking-wide">D M PRODUCTIONS</h1>
+                <p className="text-xs text-purple-300 tracking-widest uppercase mt-1">Goa • Access Portal</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-purple-300 mb-1.5">Select Role Portal</label>
+                  <select 
+                    value={loginRole} 
+                    onChange={(e) => setLoginRole(e.target.value)}
+                    className="w-full bg-[#14031D] text-white border border-purple-700 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-amber-400"
+                  >
+                    <option value="factory_staff">🏭 Factory Manager & Staff (Inventory In/Out)</option>
+                    <option value="office_staff">💼 Office Staff (Attendance & HR)</option>
+                    <option value="planner">📋 Event Planner (Full View & Editing)</option>
+                    <option value="owner">👑 Owner / Director (Full Access)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-purple-300 mb-1.5">Security PIN</label>
+                  <input
+                    type="password"
+                    placeholder="Enter Security PIN"
+                    value={pinInput}
+                    onChange={(e) => setPinInput(e.target.value)}
+                    className="w-full bg-[#14031D] text-white border border-purple-700 rounded-xl px-4 py-3 text-center text-lg tracking-widest font-bold focus:outline-none focus:border-amber-400"
+                  />
+                  <p className="text-[10px] text-purple-400 mt-1 text-center">Demo PINs: Owner (1111), Planner (2222), Factory (3333), Office (4444)</p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold rounded-2xl shadow-xl transition-all"
+                >
+                  Unlock Access Portal
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div className="min-h-screen pb-12">
@@ -143,25 +254,16 @@
                 </div>
                 <div>
                   <h1 className="font-extrabold text-lg tracking-wider text-amber-400 leading-none">D M PRODUCTIONS</h1>
-                  <p className="text-[10px] text-purple-300 tracking-widest uppercase mt-0.5">Our Precision, Your Perfect Event • GOA</p>
+                  <p className="text-[10px] text-purple-300 tracking-widest uppercase mt-0.5">GOA • {currentUser.title}</p>
                 </div>
               </div>
 
-              {/* Role Toggle Switch */}
-              <div className="flex items-center bg-[#14031D] p-1 rounded-full border border-purple-900/60">
-                <button
-                  onClick={() => setRole('staff')}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${role === 'staff' ? 'bg-amber-500 text-black shadow-md' : 'text-purple-300 hover:text-white'}`}
-                >
-                  👷 Staff
-                </button>
-                <button
-                  onClick={() => setRole('manager')}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${role === 'manager' ? 'bg-amber-500 text-black shadow-md' : 'text-purple-300 hover:text-white'}`}
-                >
-                  👑 Manager
-                </button>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700/50 rounded-xl text-xs font-bold transition-all"
+              >
+                🔒 Exit Portal
+              </button>
             </div>
           </header>
 
@@ -169,28 +271,25 @@
           <div className="bg-[#1A0524] border-b border-purple-900/40 px-4 py-2 sticky top-[61px] z-40">
             <div className="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto gap-2 no-scrollbar">
               <div className="flex gap-2">
-                {[
-                  { id: 'dashboard', label: '📊 Dashboard' },
-                  { id: 'dispatch', label: '🚚 Dispatch (OUT)' },
-                  { id: 'return', label: '📥 Return (IN)' },
-                  { id: 'catalog', label: '📦 Catalog' },
-                  { id: 'events', label: '📍 Active Events' },
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-gradient-to-r from-purple-800 to-purple-950 text-amber-300 border border-amber-500/40 shadow-lg' : 'bg-[#250833] text-purple-200 hover:bg-purple-900/50'}`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+                {canAccessInventory && (
+                  <>
+                    <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'dashboard' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200'}`}>📊 Dashboard</button>
+                    <button onClick={() => setActiveTab('dispatch')} className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'dispatch' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200'}`}>🚚 Dispatch (OUT)</button>
+                    <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'catalog' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200'}`}>📦 Catalog</button>
+                  </>
+                )}
+
+                {canAccessAttendance && (
+                  <button onClick={() => setActiveTab('attendance')} className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'attendance' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200'}`}>👷 Attendance & Labor</button>
+                )}
+
+                {canAccessOngoingMode && (
+                  <button onClick={() => setActiveTab('ongoing')} className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === 'ongoing' ? 'bg-amber-500 text-black' : 'bg-[#250833] text-purple-200'}`}>⚡ Ongoing Event Mode</button>
+                )}
               </div>
 
-              {role === 'manager' && (
-                <button 
-                  onClick={handleExportCSV}
-                  className="px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition-all shrink-0 ml-2"
-                >
+              {canAccessInventory && (
+                <button onClick={handleExportCSV} className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shrink-0">
                   📥 Export CSV
                 </button>
               )}
@@ -200,37 +299,30 @@
           <main className="max-w-7xl mx-auto px-4 mt-6">
             
             {/* TAB: DASHBOARD */}
-            {activeTab === 'dashboard' && (
+            {activeTab === 'dashboard' && canAccessInventory && (
               <div className="space-y-6">
-                {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-[#22082E] p-4 rounded-2xl border border-purple-800/40 shadow-lg">
-                    <p className="text-xs text-purple-300 font-medium">Total Workshop Stock</p>
+                    <p className="text-xs text-purple-300">Total Workshop Stock</p>
                     <p className="text-3xl font-black text-white mt-1">{totalStockCount}</p>
-                    <span className="text-[10px] text-purple-400">All registered props</span>
                   </div>
                   <div className="bg-[#22082E] p-4 rounded-2xl border border-emerald-500/30 shadow-lg">
-                    <p className="text-xs text-emerald-400 font-medium">Available in Workshop</p>
+                    <p className="text-xs text-emerald-400">Available in Workshop</p>
                     <p className="text-3xl font-black text-emerald-400 mt-1">{totalAvailableCount}</p>
-                    <span className="text-[10px] text-emerald-300/80">Ready for dispatch</span>
                   </div>
                   <div className="bg-[#22082E] p-4 rounded-2xl border border-amber-500/30 shadow-lg">
-                    <p className="text-xs text-amber-400 font-medium">Deployed at Events</p>
+                    <p className="text-xs text-amber-400">Deployed at Events</p>
                     <p className="text-3xl font-black text-amber-400 mt-1">{totalOutCount}</p>
-                    <span className="text-[10px] text-amber-300/80">On location sites</span>
                   </div>
                   <div className="bg-[#22082E] p-4 rounded-2xl border border-rose-500/30 shadow-lg">
-                    <p className="text-xs text-rose-400 font-medium">Damaged / Maintenance</p>
+                    <p className="text-xs text-rose-400">Maintenance / Damaged</p>
                     <p className="text-3xl font-black text-rose-400 mt-1">{totalMaintCount}</p>
-                    <span className="text-[10px] text-rose-300/80">Needs repair/inspection</span>
                   </div>
                 </div>
 
-                {/* Low Stock WhatsApp Alerts Section */}
+                {/* Low Stock Section */}
                 <div className="bg-[#22082E] p-5 rounded-2xl border border-amber-500/20 shadow-xl">
-                  <h3 className="font-bold text-amber-400 text-sm flex items-center gap-2 mb-3">
-                    ⚠️ Low Workshop Stock Alerts
-                  </h3>
+                  <h3 className="font-bold text-amber-400 text-sm mb-3">⚠️ Low Workshop Stock Alerts</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {inventory.filter(i => (i.total - i.out - i.maintenance) <= 10).map(item => {
                       const avail = item.total - item.out - item.maintenance;
@@ -238,13 +330,10 @@
                         <div key={item.id} className="bg-[#170420] p-3 rounded-xl border border-rose-900/50 flex items-center justify-between">
                           <div>
                             <p className="font-bold text-sm text-white">{item.name}</p>
-                            <p className="text-xs text-rose-400 font-semibold">Only {avail} {item.unit} remaining in workshop</p>
+                            <p className="text-xs text-rose-400 font-semibold">Only {avail} {item.unit} remaining</p>
                           </div>
-                          <button
-                            onClick={() => triggerWhatsAppAlert(item)}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md transition-all"
-                          >
-                            💬 WhatsApp Manager
+                          <button onClick={() => triggerWhatsAppAlert(item)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
+                            💬 WhatsApp
                           </button>
                         </div>
                       );
@@ -252,45 +341,37 @@
                   </div>
                 </div>
 
-                {/* Quick Catalog Quick View */}
-                <div>
-                  <h3 className="font-extrabold text-lg text-white mb-3">Recent Stock Movement Overview</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {inventory.map(item => {
-                      const avail = item.total - item.out - item.maintenance;
-                      const availPct = Math.round((avail / item.total) * 100);
-                      return (
-                        <div key={item.id} className="bg-[#20072C] p-4 rounded-2xl border border-purple-800/30 shadow-lg flex gap-4 items-center">
-                          <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover border border-purple-700/40 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">{item.category}</span>
-                            <h4 className="font-bold text-sm text-white truncate mt-1">{item.name}</h4>
-                            <div className="w-full bg-purple-950 rounded-full h-2 mt-2 overflow-hidden border border-purple-800/40">
-                              <div className="bg-gradient-to-r from-amber-500 to-emerald-400 h-2 rounded-full" style={{ width: `${availPct}%` }}></div>
-                            </div>
-                            <div className="flex justify-between text-[11px] mt-1.5 text-purple-200">
-                              <span>Workshop: <strong className="text-emerald-400">{avail}</strong></span>
-                              <span>Out: <strong className="text-amber-400">{item.out}</strong></span>
-                              <span>Total: <strong>{item.total}</strong></span>
-                            </div>
+                {/* Quick Catalog View */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {inventory.map(item => {
+                    const avail = item.total - item.out - item.maintenance;
+                    return (
+                      <div key={item.id} className="bg-[#20072C] p-4 rounded-2xl border border-purple-800/30 shadow-lg flex gap-4 items-center">
+                        <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover border border-purple-700/40 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">{item.category}</span>
+                          <h4 className="font-bold text-sm text-white truncate mt-1">{item.name}</h4>
+                          <div className="flex justify-between text-[11px] mt-2 text-purple-200">
+                            <span>Workshop: <strong className="text-emerald-400">{avail}</strong></span>
+                            <span>Out: <strong className="text-amber-400">{item.out}</strong></span>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* TAB: DISPATCH (OUT) */}
-            {activeTab === 'dispatch' && (
+            {/* TAB: DISPATCH */}
+            {activeTab === 'dispatch' && canManageInventory && (
               <div className="space-y-6">
                 <div className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/40 shadow-xl">
-                  <h2 className="text-lg font-extrabold text-amber-400 mb-2">Step 1: Select Event Location</h2>
+                  <h2 className="text-lg font-extrabold text-amber-400 mb-2">Select Target Event</h2>
                   <select 
                     value={selectedEventId} 
                     onChange={(e) => setSelectedEventId(e.target.value)}
-                    className="w-full bg-[#14031D] text-white border border-purple-700 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-amber-400"
+                    className="w-full bg-[#14031D] text-white border border-purple-700 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none"
                   >
                     {events.map(evt => (
                       <option key={evt.id} value={evt.id}>📍 {evt.name} — ({evt.venue})</option>
@@ -298,80 +379,36 @@
                   </select>
                 </div>
 
-                <div className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/40 shadow-xl">
-                  <h2 className="text-lg font-extrabold text-amber-400 mb-4">Step 2: Select Items to Dispatch OUT</h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {inventory.map(item => {
-                      const avail = item.total - item.out - item.maintenance;
-                      const inCart = dispatchCart[item.id] || 0;
-
-                      return (
-                        <div key={item.id} className="bg-[#170420] p-4 rounded-2xl border border-purple-900/60 flex gap-4">
-                          <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-sm text-white truncate">{item.name}</h4>
-                            <p className="text-xs text-emerald-400 font-semibold mt-0.5">Available in Workshop: {avail} {item.unit}</p>
-
-                            {/* Touch Stepper & Quick Presets */}
-                            <div className="mt-3 flex items-center gap-2">
-                              <button 
-                                onClick={() => handleCartChange(item.id, inCart - 1, avail)}
-                                className="w-9 h-9 bg-purple-900/80 hover:bg-purple-800 text-amber-400 rounded-xl font-black text-lg flex items-center justify-center border border-purple-700 active:scale-95"
-                              >
-                                -
-                              </button>
-                              <span className="w-10 text-center font-black text-amber-400 text-base">{inCart}</span>
-                              <button 
-                                onClick={() => handleCartChange(item.id, inCart + 1, avail)}
-                                className="w-9 h-9 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-black text-lg flex items-center justify-center shadow-lg active:scale-95"
-                              >
-                                +
-                              </button>
-
-                              {/* Quick Bulk Presets */}
-                              <div className="flex gap-1 ml-auto">
-                                {[5, 10, 50].map(amt => (
-                                  <button
-                                    key={amt}
-                                    onClick={() => handleCartChange(item.id, inCart + amt, avail)}
-                                    className="px-2 py-1 bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800 rounded-lg text-[10px] font-bold"
-                                  >
-                                    +{amt}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {inventory.map(item => {
+                    const avail = item.total - item.out - item.maintenance;
+                    const inCart = dispatchCart[item.id] || 0;
+                    return (
+                      <div key={item.id} className="bg-[#170420] p-4 rounded-2xl border border-purple-900/60 flex gap-4">
+                        <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-sm text-white truncate">{item.name}</h4>
+                          <p className="text-xs text-emerald-400 font-semibold mt-0.5">Available: {avail} {item.unit}</p>
+                          <div className="mt-3 flex items-center gap-2">
+                            <button onClick={() => handleCartChange(item.id, inCart - 1, avail)} className="w-9 h-9 bg-purple-900 text-amber-400 rounded-xl font-black text-lg">-</button>
+                            <span className="w-10 text-center font-black text-amber-400">{inCart}</span>
+                            <button onClick={() => handleCartChange(item.id, inCart + 1, avail)} className="w-9 h-9 bg-amber-500 text-black rounded-xl font-black text-lg">+</button>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Dispatch Confirmation Bar */}
-                  <div className="mt-6 pt-4 border-t border-purple-900/60 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-purple-300">Total Items Staged for Dispatch</p>
-                      <p className="text-xl font-black text-amber-400">
-                        {Object.values(dispatchCart).reduce((a, b) => a + b, 0)} Items
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleConfirmDispatch}
-                      disabled={Object.values(dispatchCart).reduce((a, b) => a + b, 0) === 0}
-                      className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold rounded-2xl shadow-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    >
-                      🚀 Confirm Dispatch OUT
-                    </button>
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
+
+                <button onClick={handleConfirmDispatch} className="w-full py-3.5 bg-amber-500 text-black font-extrabold rounded-2xl shadow-xl">
+                  🚀 Confirm Dispatch OUT
+                </button>
               </div>
             )}
 
             {/* TAB: CATALOG */}
-            {activeTab === 'catalog' && (
+            {activeTab === 'catalog' && canAccessInventory && (
               <div className="space-y-4">
-                {/* Search & Category Filter */}
                 <div className="flex flex-col md:flex-row gap-3">
                   <input
                     type="text"
@@ -385,7 +422,7 @@
                       <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-amber-500 text-black shadow-md' : 'bg-[#20072C] text-purple-200 border border-purple-800/50'}`}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-amber-500 text-black' : 'bg-[#20072C] text-purple-200 border border-purple-800/50'}`}
                       >
                         {cat}
                       </button>
@@ -393,7 +430,6 @@
                   </div>
                 </div>
 
-                {/* Catalog Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredInventory.map(item => {
                     const avail = item.total - item.out - item.maintenance;
@@ -401,7 +437,7 @@
                       <div key={item.id} className="bg-[#20072C] rounded-2xl border border-purple-800/40 overflow-hidden shadow-xl flex flex-col">
                         <div className="h-40 relative">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                          <span className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase">
+                          <span className="absolute top-3 left-3 bg-black/70 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase">
                             {item.category}
                           </span>
                         </div>
@@ -433,38 +469,141 @@
               </div>
             )}
 
-            {/* TAB: ACTIVE EVENTS */}
-            {activeTab === 'events' && (
-              <div className="space-y-4">
-                {events.map(evt => (
-                  <div key={evt.id} className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/40 shadow-xl">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="bg-amber-500/20 text-amber-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase border border-amber-500/30">
-                          {evt.status}
-                        </span>
-                        <h3 className="text-lg font-extrabold text-white mt-1">{evt.name}</h3>
-                        <p className="text-xs text-purple-300 mt-0.5">📍 {evt.venue} • 📅 {evt.date}</p>
-                      </div>
-                    </div>
+            {/* TAB: ATTENDANCE & LABOR (OFFICE STAFF & OWNER ONLY) */}
+            {activeTab === 'attendance' && canAccessAttendance && (
+              <div className="space-y-6">
+                <div className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/40 shadow-xl">
+                  <h3 className="text-lg font-extrabold text-amber-400 mb-3">Register Worker / Temporary Daily Labor</h3>
+                  <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Worker Name"
+                      value={newWorker.name}
+                      onChange={(e) => setNewWorker({ ...newWorker, name: e.target.value })}
+                      className="bg-[#14031D] border border-purple-700 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                    />
+                    <select
+                      value={newWorker.type}
+                      onChange={(e) => setNewWorker({ ...newWorker, type: e.target.value })}
+                      className="bg-[#14031D] border border-purple-700 rounded-xl px-3 py-2 text-sm"
+                    >
+                      <option value="Permanent">Permanent Staff</option>
+                      <option value="Temporary">Temporary Daily Labor</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Role (e.g. Helper, Rigger)"
+                      value={newWorker.role}
+                      onChange={(e) => setNewWorker({ ...newWorker, role: e.target.value })}
+                      className="bg-[#14031D] border border-purple-700 rounded-xl px-3 py-2 text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Daily Wage (₹)"
+                      value={newWorker.dailyWage}
+                      onChange={(e) => setNewWorker({ ...newWorker, dailyWage: Number(e.target.value) })}
+                      className="bg-[#14031D] border border-purple-700 rounded-xl px-3 py-2 text-sm"
+                    />
+                    <button type="submit" className="bg-amber-500 text-black font-bold rounded-xl text-sm py-2">
+                      + Add Worker
+                    </button>
+                  </form>
+                </div>
 
-                    <div className="mt-4 pt-3 border-t border-purple-900/60">
-                      <h4 className="text-xs font-bold text-purple-300 mb-2">Deployed Inventory at Location:</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(evt.dispatches).map(([itemId, qty]) => {
-                          const item = inventory.find(i => i.id === itemId);
-                          if (!item || qty === 0) return null;
-                          return (
-                            <span key={itemId} className="bg-[#14031D] border border-purple-800 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 flex items-center gap-2">
-                              <span>{item.name}:</span>
-                              <strong className="text-white bg-purple-900 px-2 py-0.5 rounded-md">{qty} {item.unit}</strong>
+                <div className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/40 shadow-xl">
+                  <h3 className="text-lg font-extrabold text-white mb-4">Daily Attendance Register & Work Allocation</h3>
+                  <div className="space-y-3">
+                    {workers.map(worker => (
+                      <div key={worker.id} className="bg-[#14031D] p-4 rounded-xl border border-purple-900 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-white text-base">{worker.name}</h4>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${worker.type === 'Permanent' ? 'bg-purple-900 text-purple-200' : 'bg-amber-500/20 text-amber-400'}`}>
+                              {worker.type}
                             </span>
-                          );
-                        })}
+                          </div>
+                          <p className="text-xs text-purple-300 mt-0.5">Role: {worker.role} • Wage: ₹{worker.dailyWage}/day</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={worker.location}
+                            onChange={(e) => updateWorkerLocation(worker.id, e.target.value)}
+                            className="bg-[#20072C] text-purple-200 border border-purple-800 rounded-xl px-3 py-1.5 text-xs font-semibold"
+                          >
+                            <option value="Warehouse">Warehouse Station</option>
+                            {events.map(evt => (
+                              <option key={evt.id} value={evt.name}>{evt.name}</option>
+                            ))}
+                          </select>
+
+                          <button
+                            onClick={() => toggleWorkerStatus(worker.id)}
+                            className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${worker.status === 'Present' ? 'bg-emerald-600 text-white' : 'bg-rose-900/60 text-rose-300'}`}
+                          >
+                            {worker.status === 'Present' ? '✓ PRESENT' : '✗ ABSENT'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB: ONGOING EVENT MODE */}
+            {activeTab === 'ongoing' && canAccessOngoingMode && (
+              <div className="space-y-6">
+                <div className="bg-[#20072C] p-5 rounded-2xl border border-purple-800/40 shadow-xl">
+                  <h2 className="text-lg font-extrabold text-amber-400 mb-2">⚡ Event Ongoing Shift Monitor</h2>
+                  <p className="text-xs text-purple-300 mb-4">Live breakdown of deployed props and labor assigned to each site.</p>
+                  
+                  {events.map(evt => (
+                    <div key={evt.id} className="bg-[#14031D] p-5 rounded-2xl border border-purple-800 mb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="bg-amber-500/20 text-amber-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase border border-amber-500/30">
+                            {evt.status}
+                          </span>
+                          <h3 className="font-extrabold text-xl text-white mt-1">{evt.name}</h3>
+                          <p className="text-xs text-purple-300 mt-0.5">📍 {evt.venue} | 📅 {evt.date}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-purple-900 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="text-xs font-bold text-amber-400 mb-2">Assigned On-Site Laborers:</h4>
+                          <div className="space-y-1.5">
+                            {workers.filter(w => w.location === evt.name).map(w => (
+                              <div key={w.id} className="bg-[#20072C] p-2.5 rounded-xl text-xs border border-purple-900 flex justify-between items-center">
+                                <span>👷 <strong>{w.name}</strong> ({w.role})</span>
+                                <span className={`font-bold ${w.status === 'Present' ? 'text-emerald-400' : 'text-rose-400'}`}>{w.status}</span>
+                              </div>
+                            ))}
+                            {workers.filter(w => w.location === evt.name).length === 0 && (
+                              <p className="text-xs text-purple-400 italic">No workers currently assigned to this event location.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="text-xs font-bold text-amber-400 mb-2">Equipment Deployed on Location:</h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {Object.entries(evt.dispatches).map(([itemId, qty]) => {
+                              const item = inventory.find(i => i.id === itemId);
+                              if (!item || qty === 0) return null;
+                              return (
+                                <span key={itemId} className="bg-[#20072C] border border-purple-800 px-2.5 py-1 rounded-lg text-xs font-semibold text-purple-200">
+                                  {item.name}: <strong className="text-amber-400">{qty} {item.unit}</strong>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
 
