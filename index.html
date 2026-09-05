@@ -112,6 +112,16 @@
       const [newLeave, setNewLeave] = useState({ applicant: '', type: 'Casual Leave', dates: '', reason: '' });
       const [newExpense, setNewExpense] = useState({ submitter: '', category: 'Site Freight', amount: '', details: '' });
 
+      const handleSaveEvent = (e) => {
+    e.preventDefault();
+    const updatedProjects = projects.map(p => p.id === editingEvent.id ? editingEvent : p);
+    setProjects(updatedProjects);
+    if (window.databaseRef) {
+      window.databaseRef.child('projects').set(updatedProjects);
+    }
+    setEditingEvent(null);
+  };
+      
       // Initialize Realtime Cloud DB if configured
       useEffect(() => {
         if (!firebaseConfigStr) return;
