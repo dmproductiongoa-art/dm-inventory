@@ -219,7 +219,7 @@
                 setAppLogo(base64Logo);
                 localStorage.setItem('dm_app_logo_v10', base64Logo);
                 if (window.databaseRef) {
-                    window.databaseRef.child('appLogo').set(base64Logo);
+                    window.databaseRef.child('dm_portal_state').update({ appLogo: base64Logo });
                 }
             };
             reader.readAsDataURL(file);
