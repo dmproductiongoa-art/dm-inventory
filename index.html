@@ -144,7 +144,7 @@
           }
           const database = firebase.database();
           window.databaseRef = database.ref();
-          dbRef.current = database.ref();
+          dbRef.current = database;
           setDbConnected(true);
 
           // RealtimeListeners
