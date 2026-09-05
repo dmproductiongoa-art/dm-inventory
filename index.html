@@ -73,7 +73,7 @@
       const [pinInput, setPinInput] = useState('');
 
       // State persistence & Cloud sync configuration
-      const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('dm_firebase_cfg_v10') || '');
+      const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('dm_firebase_cfg_v10') || JSON.stringify({ apiKey: "AIzaSyDnRdJvNcoZBDD7nCNucl-WLCyymkw78Iw", authDomain: "dm-production-app.firebaseapp.com", databaseURL: "https://dm-production-app-default-rtdb.firebaseio.com", projectId: "dm-production-app", storageBucket: "dm-production-app.firebasestorage.app", messagingSenderId: "152552440620", appId: "1:152552440620:web:6dfd042c2c4f31d609e289" }));
       const [dbConnected, setDbConnected] = useState(false);
       const dbRef = useRef(null);
 
