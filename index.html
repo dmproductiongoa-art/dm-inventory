@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Roboto+Mono:wght@500;700&family=Poppins:wght@400;600;800;900&family=Cinzel:wght@600;800&display=swap">
 </head>
 <body class="bg-[#0D0214] text-slate-100 antialiased selection:bg-amber-500 selection:text-black min-h-screen">
 
@@ -18,13 +19,23 @@
 
     const DEFAULT_PINS = { owner: '1111', planner: '2222', factory_staff: '3333', office_staff: '4444' };
 
+    const DEFAULT_TAB_NAMES = {
+      dispatch: '⚡ Tab Dispatch Entry',
+      overview: '📊 Live Inventory Overview',
+      catalog: '📦 Catalog & Add Item',
+      inhouse_staff: '👷 Inhouse Employees',
+      market_labours: '🔨 Market Labours',
+      projects: '🎪 Events & Sites',
+      settings: '⚙️ Logo & Settings'
+    };
+
     const INITIAL_INVENTORY = [
-      { id: 'INV-1001', name: 'Angle Ply (8x4 ft)', category: 'Staging & Trusses', total: 100, out: 15, unit: 'Pcs', rackLocation: 'Zone A - Rack 04' },
-      { id: 'INV-1002', name: 'Angle Ply (6x4 ft)', category: 'Staging & Trusses', total: 80, out: 10, unit: 'Pcs', rackLocation: 'Zone A - Rack 05' },
-      { id: 'INV-1003', name: 'Gold Mirror Island Bar', category: 'Bar Structures', total: 6, out: 2, unit: 'Units', rackLocation: 'Zone B - Bay 01' },
-      { id: 'INV-1004', name: 'Vintage Wooden Bar', category: 'Bar Structures', total: 4, out: 1, unit: 'Units', rackLocation: 'Zone B - Bay 02' },
-      { id: 'INV-1005', name: 'Aluminum Box Truss (10ft)', category: 'Staging & Trusses', total: 40, out: 12, unit: 'Pcs', rackLocation: 'Zone A - Rack 12' },
-      { id: 'INV-1006', name: 'Royal Velvet Drapes (Maroon)', category: 'Fabrics & Drapes', total: 60, out: 20, unit: 'Rolls', rackLocation: 'Fabric Vault B' }
+      { id: 'INV-1001', name: 'Angle Ply (8x4 ft)', category: 'Staging & Trusses', total: 100, out: 15, unit: 'Pcs', rackLocation: 'Zone A - Rack 04', image: '' },
+      { id: 'INV-1002', name: 'Angle Ply (6x4 ft)', category: 'Staging & Trusses', total: 80, out: 10, unit: 'Pcs', rackLocation: 'Zone A - Rack 05', image: '' },
+      { id: 'INV-1003', name: 'Gold Mirror Island Bar', category: 'Bar Structures', total: 6, out: 2, unit: 'Units', rackLocation: 'Zone B - Bay 01', image: '' },
+      { id: 'INV-1004', name: 'Vintage Wooden Bar', category: 'Bar Structures', total: 4, out: 1, unit: 'Units', rackLocation: 'Zone B - Bay 02', image: '' },
+      { id: 'INV-1005', name: 'Aluminum Box Truss (10ft)', category: 'Staging & Trusses', total: 40, out: 12, unit: 'Pcs', rackLocation: 'Zone A - Rack 12', image: '' },
+      { id: 'INV-1006', name: 'Royal Velvet Drapes (Maroon)', category: 'Fabrics & Drapes', total: 60, out: 20, unit: 'Rolls', rackLocation: 'Fabric Vault B', image: '' }
     ];
 
     const INITIAL_WORKERS = [
@@ -46,36 +57,46 @@
       const [loginRole, setLoginRole] = useState('owner');
       const [pinInput, setPinInput] = useState('');
 
-      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v8')) || DEFAULT_PINS);
-      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v8') || null);
+      const [rolePins, setRolePins] = useState(() => JSON.parse(localStorage.getItem('dm_pins_v9')) || DEFAULT_PINS);
+      const [appLogo, setAppLogo] = useState(() => localStorage.getItem('dm_app_logo_v9') || null);
+
+      // Customization & Settings State
+      const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('dm_font_v9') || 'Inter');
+      const [themeAccent, setThemeAccent] = useState(() => localStorage.getItem('dm_accent_v9') || '#f59e0b');
+      const [bgStyle, setBgStyle] = useState(() => localStorage.getItem('dm_bg_v9') || '#0D0214');
+      const [tabNames, setTabNames] = useState(() => JSON.parse(localStorage.getItem('dm_tabs_v9')) || DEFAULT_TAB_NAMES);
 
       const [activeTab, setActiveTab] = useState('dispatch');
-      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v8')) || INITIAL_INVENTORY);
-      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v8')) || INITIAL_WORKERS);
-      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v8')) || INITIAL_PROJECTS);
-      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v8')) || []);
+      const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('dm_inventory_v9')) || INITIAL_INVENTORY);
+      const [workers, setWorkers] = useState(() => JSON.parse(localStorage.getItem('dm_workers_v9')) || INITIAL_WORKERS);
+      const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem('dm_projects_v9')) || INITIAL_PROJECTS);
+      const [dispatchLogs, setDispatchLogs] = useState(() => JSON.parse(localStorage.getItem('dm_logs_v9')) || []);
 
       const [selectedCatTab, setSelectedCatTab] = useState('Staging & Trusses');
       const [selectedItemId, setSelectedItemId] = useState('');
       const [dispatchQuantity, setDispatchQuantity] = useState(1);
       const [targetProject, setTargetProject] = useState(projects[0]?.clientName || 'General Site');
       const [actionType, setActionType] = useState('OUT');
+      const [conditionPhoto, setConditionPhoto] = useState(null);
 
       // Forms State
-      const [newItem, setNewItem] = useState({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '' });
+      const [newItem, setNewItem] = useState({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '', image: '' });
       const [newWorker, setNewWorker] = useState({ name: '', type: 'Inhouse', role: 'Stage Crew', sitePresence: 'In Warehouse', dailyWage: 800 });
       const [newProject, setNewProject] = useState({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
 
-      // Persistence Sync
-      useEffect(() => { localStorage.setItem('dm_inventory_v8', JSON.stringify(inventory)); }, [inventory]);
-      useEffect(() => { localStorage.setItem('dm_workers_v8', JSON.stringify(workers)); }, [workers]);
-      useEffect(() => { localStorage.setItem('dm_projects_v8', JSON.stringify(projects)); }, [projects]);
-      useEffect(() => { localStorage.setItem('dm_logs_v8', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
-      useEffect(() => { localStorage.setItem('dm_pins_v8', JSON.stringify(rolePins)); }, [rolePins]);
+      // Sync Local Storage
+      useEffect(() => { localStorage.setItem('dm_inventory_v9', JSON.stringify(inventory)); }, [inventory]);
+      useEffect(() => { localStorage.setItem('dm_workers_v9', JSON.stringify(workers)); }, [workers]);
+      useEffect(() => { localStorage.setItem('dm_projects_v9', JSON.stringify(projects)); }, [projects]);
+      useEffect(() => { localStorage.setItem('dm_logs_v9', JSON.stringify(dispatchLogs)); }, [dispatchLogs]);
+      useEffect(() => { localStorage.setItem('dm_pins_v9', JSON.stringify(rolePins)); }, [rolePins]);
+      useEffect(() => { localStorage.setItem('dm_font_v9', fontFamily); }, [fontFamily]);
+      useEffect(() => { localStorage.setItem('dm_accent_v9', themeAccent); }, [themeAccent]);
+      useEffect(() => { localStorage.setItem('dm_bg_v9', bgStyle); }, [bgStyle]);
+      useEffect(() => { localStorage.setItem('dm_tabs_v9', JSON.stringify(tabNames)); }, [tabNames]);
 
       const categories = ['Staging & Trusses', 'Bar Structures', 'Fabrics & Drapes'];
 
-      // Role Permissions
       const isOwner = currentUser?.role === 'owner';
       const isPlanner = currentUser?.role === 'planner';
       const isFactory = currentUser?.role === 'factory_staff';
@@ -83,10 +104,9 @@
 
       const canDispatch = isOwner || isPlanner || isFactory;
       const canManageCatalog = isOwner || isFactory;
-      const canEditPersonnel = isOwner || isOffice; // Only Editable access to Office Staff & Owner
+      const canEditPersonnel = isOwner || isOffice;
       const canManageSettings = isOwner;
 
-      // Aggregates for Dashboard Header Cards
       const ongoingEventsCount = useMemo(() => projects.filter(p => p.status === 'Ongoing').length, [projects]);
       const upcomingEventsCount = useMemo(() => projects.filter(p => p.status === 'Upcoming').length, [projects]);
       const availableInhouseCount = useMemo(() => workers.filter(w => w.type === 'Inhouse' && w.status === 'Present').length, [workers]);
@@ -97,17 +117,29 @@
         if (file) {
           const reader = new FileReader();
           reader.onloadend = () => {
-            const base64Logo = reader.result;
-            setAppLogo(base64Logo);
-            localStorage.setItem('dm_app_logo_v8', base64Logo);
+            setAppLogo(reader.result);
+            localStorage.setItem('dm_app_logo_v9', reader.result);
           };
           reader.readAsDataURL(file);
         }
       };
 
-      const handleClearLogo = () => {
-        setAppLogo(null);
-        localStorage.removeItem('dm_app_logo_v8');
+      const handleInventoryPhotoUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => setNewItem(prev => ({ ...prev, image: reader.result }));
+          reader.readAsDataURL(file);
+        }
+      };
+
+      const handleConditionPhotoCapture = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => setConditionPhoto(reader.result);
+          reader.readAsDataURL(file);
+        }
       };
 
       const itemsInSelectedCategory = useMemo(() => {
@@ -171,17 +203,19 @@
           qty: dispatchQuantity,
           type: actionType,
           project: targetProject,
-          by: currentUser.title
+          by: currentUser.title,
+          conditionPhoto: conditionPhoto
         };
         setDispatchLogs(logs => [logEntry, ...logs]);
         setDispatchQuantity(1);
+        setConditionPhoto(null);
       };
 
       const handleAddItem = (e) => {
         e.preventDefault();
         if (!newItem.name) return;
         setInventory([...inventory, { ...newItem, id: 'INV-' + (1000 + inventory.length + 1), total: Number(newItem.total), out: 0 }]);
-        setNewItem({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '' });
+        setNewItem({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '', image: '' });
       };
 
       const handleAddWorker = (e) => {
@@ -198,10 +232,9 @@
         setNewProject({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
       };
 
-      // LOGIN SCREEN
       if (!currentUser) {
         return (
-          <div className="min-h-screen flex items-center justify-center p-4 bg-[#0D0214]">
+          <div className="min-h-screen flex items-center justify-center p-4 bg-[#0D0214]" style={{ fontFamily }}>
             <div className="w-full max-w-sm bg-[#1B0626] border border-purple-800/80 rounded-3xl p-6 space-y-6 shadow-2xl">
               <div className="text-center">
                 {appLogo ? (
@@ -216,7 +249,7 @@
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-purple-300 mb-1 uppercase">Select Access Role</label>
-                  <select value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full bg-[#0D0214] text-white border border-purple-700/80 rounded-xl px-3 py-2.5 text-sm font-semibold focus:border-amber-400">
+                  <select value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full bg-[#0D0214] text-white border border-purple-700/80 rounded-xl px-3 py-2.5 text-sm font-semibold">
                     <option value="owner">👑 Owner</option>
                     <option value="planner">📋 Event Planner</option>
                     <option value="factory_staff">🏭 Factory Manager</option>
@@ -226,10 +259,10 @@
 
                 <div>
                   <label className="block text-xs font-bold text-purple-300 mb-1 uppercase">Enter PIN Code</label>
-                  <input type="password" placeholder="••••" value={pinInput} onChange={e => setPinInput(e.target.value)} className="w-full bg-[#0D0214] text-amber-400 border border-purple-700/80 rounded-xl px-3 py-2 text-center text-2xl font-black tracking-widest focus:border-amber-400" />
+                  <input type="password" placeholder="••••" value={pinInput} onChange={e => setPinInput(e.target.value)} className="w-full bg-[#0D0214] text-amber-400 border border-purple-700/80 rounded-xl px-3 py-2 text-center text-2xl font-black tracking-widest" />
                 </div>
 
-                <button type="submit" className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-xl text-sm shadow-lg shadow-amber-500/20 transition">
+                <button type="submit" className="w-full py-3.5 text-black font-black rounded-xl text-sm shadow-lg transition" style={{ backgroundColor: themeAccent }}>
                   AUTHORIZE LOG IN
                 </button>
               </form>
@@ -239,17 +272,17 @@
       }
 
       return (
-        <div className="min-h-screen pb-12">
+        <div className="min-h-screen pb-12" style={{ fontFamily, backgroundColor: bgStyle }}>
           {/* HEADER */}
           <header className="bg-[#1B0626] border-b border-purple-900/80 px-6 py-3 flex justify-between items-center sticky top-0 z-50">
             <div className="flex items-center gap-3">
               {appLogo ? (
-                <img src={appLogo} className="w-10 h-10 rounded-xl object-contain bg-[#0D0214] p-0.5 border border-amber-400" />
+                <img src={appLogo} className="w-10 h-10 rounded-xl object-contain bg-[#0D0214] p-0.5 border" style={{ borderColor: themeAccent }} />
               ) : (
-                <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center text-black font-black text-lg">★</div>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-black font-black text-lg" style={{ backgroundColor: themeAccent }}>★</div>
               )}
               <div>
-                <h1 className="font-black text-amber-400 text-base leading-none">D M PRODUCTIONS</h1>
+                <h1 className="font-black text-base leading-none" style={{ color: themeAccent }}>D M PRODUCTIONS</h1>
                 <p className="text-[10px] text-purple-300 font-bold mt-0.5">{currentUser.title}</p>
               </div>
             </div>
@@ -261,44 +294,39 @@
           {/* MAIN NAVIGATION TABS */}
           <div className="bg-[#13031C] border-b border-purple-900/60 px-6 py-2.5 flex gap-2 overflow-x-auto">
             {canDispatch && (
-              <button onClick={() => setActiveTab('dispatch')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dispatch' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-                ⚡ Tab Dispatch Entry
+              <button onClick={() => setActiveTab('dispatch')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'dispatch' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'dispatch' ? { backgroundColor: themeAccent } : {}}>
+                {tabNames.dispatch}
               </button>
             )}
-            <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'overview' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-              📊 Live Inventory Overview
+            <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'overview' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'overview' ? { backgroundColor: themeAccent } : {}}>
+              {tabNames.overview}
             </button>
             {canManageCatalog && (
-              <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'catalog' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-                📦 Catalog & Add Item
+              <button onClick={() => setActiveTab('catalog')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'catalog' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'catalog' ? { backgroundColor: themeAccent } : {}}>
+                {tabNames.catalog}
               </button>
             )}
-            <button onClick={() => setActiveTab('inhouse_staff')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'inhouse_staff' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-              👷 Inhouse Employees
+            <button onClick={() => setActiveTab('inhouse_staff')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'inhouse_staff' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'inhouse_staff' ? { backgroundColor: themeAccent } : {}}>
+              {tabNames.inhouse_staff}
             </button>
-            <button onClick={() => setActiveTab('market_labours')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'market_labours' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-              🔨 Market Labours
+            <button onClick={() => setActiveTab('market_labours')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'market_labours' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'market_labours' ? { backgroundColor: themeAccent } : {}}>
+              {tabNames.market_labours}
             </button>
-            <button onClick={() => setActiveTab('projects')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'projects' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-              🎪 Events & Sites
+            <button onClick={() => setActiveTab('projects')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'projects' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'projects' ? { backgroundColor: themeAccent } : {}}>
+              {tabNames.projects}
             </button>
             {canManageSettings && (
-              <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'settings' ? 'bg-amber-500 text-black' : 'bg-[#20072E] text-purple-200'}`}>
-                ⚙️ Logo & Settings
+              <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'settings' ? 'text-black font-extrabold' : 'bg-[#20072E] text-purple-200'}`} style={activeTab === 'settings' ? { backgroundColor: themeAccent } : {}}>
+                {tabNames.settings}
               </button>
             )}
           </div>
 
           <main className="max-w-6xl mx-auto px-6 mt-5 space-y-5">
 
-            {/* NEW TOP DASHBOARD OVERVIEW CARDS WITH REDIRECT LINKS */}
+            {/* TOP METRIC SUMMARY CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              
-              {/* Ongoing Events Card */}
-              <div 
-                onClick={() => setActiveTab('projects')}
-                className="bg-[#1B0626] p-4 rounded-2xl border border-emerald-500/40 hover:border-emerald-400 cursor-pointer transition flex justify-between items-center group"
-              >
+              <div onClick={() => setActiveTab('projects')} className="bg-[#1B0626] p-4 rounded-2xl border border-emerald-500/40 hover:border-emerald-400 cursor-pointer transition flex justify-between items-center group">
                 <div>
                   <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider group-hover:underline">Ongoing Events</p>
                   <p className="text-2xl font-black text-emerald-400 mt-0.5">{ongoingEventsCount}</p>
@@ -306,11 +334,7 @@
                 <div className="text-2xl">🔥</div>
               </div>
 
-              {/* Upcoming Events Card */}
-              <div 
-                onClick={() => setActiveTab('projects')}
-                className="bg-[#1B0626] p-4 rounded-2xl border border-amber-500/40 hover:border-amber-400 cursor-pointer transition flex justify-between items-center group"
-              >
+              <div onClick={() => setActiveTab('projects')} className="bg-[#1B0626] p-4 rounded-2xl border border-amber-500/40 hover:border-amber-400 cursor-pointer transition flex justify-between items-center group">
                 <div>
                   <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider group-hover:underline">Upcoming Events</p>
                   <p className="text-2xl font-black text-amber-400 mt-0.5">{upcomingEventsCount}</p>
@@ -318,11 +342,7 @@
                 <div className="text-2xl">📅</div>
               </div>
 
-              {/* Available Staff Inhouse Card */}
-              <div 
-                onClick={() => setActiveTab('inhouse_staff')}
-                className="bg-[#1B0626] p-4 rounded-2xl border border-purple-800/80 hover:border-purple-600 cursor-pointer transition flex justify-between items-center group"
-              >
+              <div onClick={() => setActiveTab('inhouse_staff')} className="bg-[#1B0626] p-4 rounded-2xl border border-purple-800/80 hover:border-purple-600 cursor-pointer transition flex justify-between items-center group">
                 <div>
                   <p className="text-[10px] text-purple-300 font-bold uppercase tracking-wider group-hover:underline">Available Staff Inhouse</p>
                   <p className="text-2xl font-black text-white mt-0.5">{availableInhouseCount}</p>
@@ -330,25 +350,20 @@
                 <div className="text-2xl">👷</div>
               </div>
 
-              {/* Market Labours Count Card */}
-              <div 
-                onClick={() => setActiveTab('market_labours')}
-                className="bg-[#1B0626] p-4 rounded-2xl border border-rose-500/40 hover:border-rose-400 cursor-pointer transition flex justify-between items-center group"
-              >
+              <div onClick={() => setActiveTab('market_labours')} className="bg-[#1B0626] p-4 rounded-2xl border border-rose-500/40 hover:border-rose-400 cursor-pointer transition flex justify-between items-center group">
                 <div>
                   <p className="text-[10px] text-rose-400 font-bold uppercase tracking-wider group-hover:underline">Market Labours Count</p>
                   <p className="text-2xl font-black text-rose-400 mt-0.5">{marketLaboursCount}</p>
                 </div>
                 <div className="text-2xl">🔨</div>
               </div>
-
             </div>
 
             {/* TAB: TAB DISPATCH ENTRY */}
             {activeTab === 'dispatch' && canDispatch && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800 space-y-5">
                 <div className="flex justify-between items-center border-b border-purple-900/80 pb-3">
-                  <h3 className="text-base font-bold text-amber-400">⚡ Dispatch & Return Selection Entry</h3>
+                  <h3 className="text-base font-bold" style={{ color: themeAccent }}>⚡ Dispatch & Return Selection Entry</h3>
                   <div className="flex gap-2">
                     <button onClick={() => setActionType('OUT')} className={`px-3 py-1 rounded-lg text-xs font-extrabold ${actionType === 'OUT' ? 'bg-amber-500 text-black' : 'bg-[#0D0214] text-purple-400'}`}>Dispatch (OUT)</button>
                     <button onClick={() => setActionType('IN')} className={`px-3 py-1 rounded-lg text-xs font-extrabold ${actionType === 'IN' ? 'bg-emerald-500 text-black' : 'bg-[#0D0214] text-purple-400'}`}>Return (IN)</button>
@@ -362,7 +377,7 @@
                       <button
                         key={cat}
                         onClick={() => setSelectedCatTab(cat)}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-black transition border ${selectedCatTab === cat ? 'bg-amber-500 text-black border-amber-400 shadow-md shadow-amber-500/20' : 'bg-[#0D0214] text-purple-300 border-purple-800/80 hover:bg-purple-900/30'}`}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-black transition border ${selectedCatTab === cat ? 'bg-amber-500 text-black border-amber-400 shadow-md' : 'bg-[#0D0214] text-purple-300 border-purple-800/80 hover:bg-purple-900/30'}`}
                       >
                         {cat}
                       </button>
@@ -409,6 +424,23 @@
                     </select>
                   </div>
 
+                  {/* ITEM CONDITION CAMERA SNAPSHOT */}
+                  <div className="md:col-span-3 bg-[#0D0214] p-4 rounded-xl border border-purple-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                      <h4 className="text-xs font-bold text-amber-400 uppercase">📷 Capture Condition Photo (Dispatch/Return Audit)</h4>
+                      <p className="text-[11px] text-purple-300">Take a direct device camera photo to log physical damage or condition before movement.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {conditionPhoto && (
+                        <img src={conditionPhoto} className="w-12 h-12 rounded-lg object-cover border border-amber-400" />
+                      )}
+                      <label className="px-4 py-2 bg-purple-900 hover:bg-purple-800 text-purple-200 border border-purple-700 rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5">
+                        📷 Snap / Upload Condition
+                        <input type="file" accept="image/*" capture="environment" onChange={handleConditionPhotoCapture} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+
                   <div className="md:col-span-3 pt-2">
                     <button
                       type="submit"
@@ -421,14 +453,15 @@
               </div>
             )}
 
-            {/* TAB: LIVE INVENTORY OVERVIEW */}
-            {(activeTab === 'overview' || isOwner) && (
+            {/* TAB: LIVE INVENTORY OVERVIEW (STATIC BREAKDOWN TABLE DISPLAYED ONLY HERE) */}
+            {activeTab === 'overview' && (
               <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                <h3 className="text-base font-bold text-amber-400">📋 Live Inventory Breakdown</h3>
+                <h3 className="text-base font-bold" style={{ color: themeAccent }}>📋 Live Inventory Breakdown</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs text-purple-200">
                     <thead className="bg-[#0D0214] text-purple-300 uppercase font-mono border-b border-purple-800">
                       <tr>
+                        <th className="p-3">Photo</th>
                         <th className="p-3">Item Name</th>
                         <th className="p-3">Category</th>
                         <th className="p-3">Rack Location</th>
@@ -442,6 +475,13 @@
                         const warehouseUnits = item.total - item.out;
                         return (
                           <tr key={item.id} className="hover:bg-purple-950/30 transition">
+                            <td className="p-3">
+                              {item.image ? (
+                                <img src={item.image} className="w-10 h-10 rounded-lg object-cover border border-purple-700" />
+                              ) : (
+                                <div className="w-10 h-10 rounded-lg bg-[#0D0214] border border-purple-800 flex items-center justify-center text-[10px] text-purple-400">No Img</div>
+                              )}
+                            </td>
                             <td className="p-3 font-extrabold text-white">{item.name}</td>
                             <td className="p-3 text-purple-400">{item.category}</td>
                             <td className="p-3 text-purple-300 font-mono">{item.rackLocation}</td>
@@ -457,11 +497,11 @@
               </div>
             )}
 
-            {/* TAB: CATALOG MANAGEMENT */}
+            {/* TAB: CATALOG & INVENTORY PICTURE UPLOADS */}
             {activeTab === 'catalog' && canManageCatalog && (
               <div className="space-y-5">
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                  <h3 className="text-base font-bold text-amber-400">➕ Add New Inventory Item</h3>
+                  <h3 className="text-base font-bold" style={{ color: themeAccent }}>➕ Add New Inventory Item with Picture</h3>
                   <form onSubmit={handleAddItem} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <input type="text" required placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <select value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm">
@@ -469,30 +509,35 @@
                     </select>
                     <input type="number" required placeholder="Total Units" value={newItem.total} onChange={e => setNewItem({...newItem, total: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <input type="text" placeholder="Rack Location" value={newItem.rackLocation} onChange={e => setNewItem({...newItem, rackLocation: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
-                    <button type="submit" className="md:col-span-4 bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Save Inventory Item</button>
+                    
+                    <div className="md:col-span-4 flex items-center gap-3 bg-[#0D0214] p-3 rounded-xl border border-purple-800">
+                      <label className="text-xs font-bold text-purple-300">🖼️ Upload Item Picture:</label>
+                      <input type="file" accept="image/*" onChange={handleInventoryPhotoUpload} className="text-xs text-purple-200" />
+                      {newItem.image && <img src={newItem.image} className="w-10 h-10 rounded-lg object-cover border border-amber-400" />}
+                    </div>
+
+                    <button type="submit" className="md:col-span-4 font-black text-black py-3 rounded-xl text-sm" style={{ backgroundColor: themeAccent }}>+ Save Inventory Item</button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* TAB: INHOUSE EMPLOYEES (LIST OF EMPLOYEES - EDITABLE ONLY BY OWNER & OFFICE STAFF) */}
+            {/* TAB: INHOUSE EMPLOYEES */}
             {activeTab === 'inhouse_staff' && (
               <div className="space-y-5">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-base font-bold text-amber-400">👷 List of Inhouse Employees</h3>
-                  {!canEditPersonnel && (
-                    <span className="text-xs bg-purple-950/80 text-purple-300 border border-purple-800 px-3 py-1 rounded-lg">🔒 View-Only Mode</span>
-                  )}
+                  <h3 className="text-base font-bold" style={{ color: themeAccent }}>👷 List of Inhouse Employees</h3>
+                  {!canEditPersonnel && <span className="text-xs bg-purple-950/80 text-purple-300 border border-purple-800 px-3 py-1 rounded-lg">🔒 View-Only Mode</span>}
                 </div>
 
                 {canEditPersonnel && (
                   <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                    <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Add Inhouse Employee</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: themeAccent }}>Add Inhouse Employee</h4>
                     <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                       <input type="text" required placeholder="Employee Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value, type: 'Inhouse'})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                       <input type="text" placeholder="Designation / Role" value={newWorker.role} onChange={e => setNewWorker({...newWorker, role: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                       <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
-                      <button type="submit" className="bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Add Employee</button>
+                      <button type="submit" className="font-black text-black py-3 rounded-xl text-sm" style={{ backgroundColor: themeAccent }}>+ Add Employee</button>
                     </form>
                   </div>
                 )}
@@ -523,24 +568,22 @@
               </div>
             )}
 
-            {/* TAB: MARKET LABOURS (LIST + SITE PRESENCES + WAGES - EDITABLE ONLY BY OWNER & OFFICE STAFF) */}
+            {/* TAB: MARKET LABOURS */}
             {activeTab === 'market_labours' && (
               <div className="space-y-5">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-base font-bold text-amber-400">🔨 Market Labours & Site Presence</h3>
-                  {!canEditPersonnel && (
-                    <span className="text-xs bg-purple-950/80 text-purple-300 border border-purple-800 px-3 py-1 rounded-lg">🔒 View-Only Mode</span>
-                  )}
+                  <h3 className="text-base font-bold" style={{ color: themeAccent }}>🔨 Market Labours & Site Presence</h3>
+                  {!canEditPersonnel && <span className="text-xs bg-purple-950/80 text-purple-300 border border-purple-800 px-3 py-1 rounded-lg">🔒 View-Only Mode</span>}
                 </div>
 
                 {canEditPersonnel && (
                   <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                    <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Register Market Labour</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: themeAccent }}>Register Market Labour</h4>
                     <form onSubmit={handleAddWorker} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                       <input type="text" required placeholder="Labour Name" value={newWorker.name} onChange={e => setNewWorker({...newWorker, name: e.target.value, type: 'Market Labour'})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                       <input type="text" placeholder="Assigned Site Presence" value={newWorker.sitePresence} onChange={e => setNewWorker({...newWorker, sitePresence: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                       <input type="number" placeholder="Daily Wage (₹)" value={newWorker.dailyWage} onChange={e => setNewWorker({...newWorker, dailyWage: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
-                      <button type="submit" className="bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Add Market Labour</button>
+                      <button type="submit" className="font-black text-black py-3 rounded-xl text-sm" style={{ backgroundColor: themeAccent }}>+ Add Market Labour</button>
                     </form>
                   </div>
                 )}
@@ -572,11 +615,11 @@
               </div>
             )}
 
-            {/* TAB: EVENTS & SITES (EDITABLE & OVERVIEW LIST) */}
+            {/* TAB: EVENTS & SITES */}
             {activeTab === 'projects' && (
               <div className="space-y-5">
                 <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                  <h3 className="text-base font-bold text-amber-400">🎪 Registered Events Overview & Management</h3>
+                  <h3 className="text-base font-bold" style={{ color: themeAccent }}>🎪 Registered Events Overview & Management</h3>
                   <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <input type="text" required placeholder="Client / Event Name" value={newProject.clientName} onChange={e => setNewProject({...newProject, clientName: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
                     <input type="text" placeholder="Venue Location" value={newProject.location} onChange={e => setNewProject({...newProject, location: e.target.value})} className="bg-[#0D0214] p-3 rounded-xl border border-purple-700/80 text-sm" />
@@ -586,7 +629,7 @@
                       <option value="Ongoing">Ongoing</option>
                       <option value="Completed">Completed</option>
                     </select>
-                    <button type="submit" className="md:col-span-4 bg-amber-500 font-black text-black py-3 rounded-xl text-sm">+ Register Event Site</button>
+                    <button type="submit" className="md:col-span-4 font-black text-black py-3 rounded-xl text-sm" style={{ backgroundColor: themeAccent }}>+ Register Event Site</button>
                   </form>
                 </div>
 
@@ -594,7 +637,7 @@
                   {projects.map(p => (
                     <div key={p.id} className="bg-[#1B0626] p-4 rounded-xl border border-purple-800/80 space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-mono text-amber-400 font-bold">{p.id}</span>
+                        <span className="text-[10px] font-mono font-bold" style={{ color: themeAccent }}>{p.id}</span>
                         <select
                           value={p.status}
                           onChange={e => setProjects(projects.map(item => item.id === p.id ? { ...item, status: e.target.value } : item))}
@@ -614,44 +657,86 @@
               </div>
             )}
 
-            {/* TAB: SETTINGS */}
+            {/* TAB: COMPREHENSIVE SETTINGS & CUSTOMIZATION */}
             {activeTab === 'settings' && canManageSettings && (
-              <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 max-w-xl space-y-6">
+              <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-6">
+                <h3 className="text-base font-bold" style={{ color: themeAccent }}>⚙️ System Settings & Visual Customization</h3>
+
+                {/* Theme & Appearance */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-purple-900 pb-5">
+                  <div>
+                    <label className="block text-xs font-bold text-purple-300 mb-1">Accent Color</label>
+                    <input type="color" value={themeAccent} onChange={e => setThemeAccent(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border-0" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-purple-300 mb-1">Background Theme</label>
+                    <select value={bgStyle} onChange={e => setBgStyle(e.target.value)} className="w-full bg-[#0D0214] p-2.5 rounded-xl border border-purple-700 text-xs">
+                      <option value="#0D0214">Deep Purple Dark</option>
+                      <option value="#09090b">Midnight Obsidian</option>
+                      <option value="#0f172a">Navy Dark</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-purple-300 mb-1">Font Family</label>
+                    <select value={fontFamily} onChange={e => setFontFamily(e.target.value)} className="w-full bg-[#0D0214] p-2.5 rounded-xl border border-purple-700 text-xs">
+                      <option value="Inter">Inter Standard</option>
+                      <option value="Poppins">Poppins Modern</option>
+                      <option value="Roboto Mono">Roboto Mono Technical</option>
+                      <option value="Cinzel">Cinzel Elegant</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Logo Customization */}
+                <div className="border-b border-purple-900 pb-5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-2 text-purple-300">Logo & Branding</h4>
+                  <div className="flex items-center gap-4">
+                    {appLogo ? <img src={appLogo} className="w-16 h-16 rounded-xl object-contain bg-[#0D0214] p-1 border-2" style={{ borderColor: themeAccent }} /> : <div className="w-16 h-16 rounded-xl flex items-center justify-center text-black font-black text-2xl" style={{ backgroundColor: themeAccent }}>★</div>}
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="bg-[#0D0214] p-2 rounded-xl border border-purple-700 text-xs text-purple-200" />
+                  </div>
+                </div>
+
+                {/* Rename Tabs */}
                 <div>
-                  <h3 className="text-base font-bold text-amber-400">📷 Company Logo Branding</h3>
-                  <div className="mt-4 flex items-center gap-4">
-                    {appLogo ? (
-                      <img src={appLogo} className="w-16 h-16 rounded-xl object-contain bg-[#0D0214] p-1 border-2 border-amber-400" />
-                    ) : (
-                      <div className="w-16 h-16 bg-amber-500 rounded-xl flex items-center justify-center text-black font-black text-2xl">★</div>
-                    )}
-                    <div className="space-y-2">
-                      <input type="file" accept="image/*" onChange={handleLogoUpload} className="bg-[#0D0214] p-2 rounded-xl border border-purple-700 text-xs text-purple-200" />
-                      {appLogo && (
-                        <button onClick={handleClearLogo} className="block text-xs font-bold text-rose-400 hover:underline">Reset Logo</button>
-                      )}
-                    </div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-3 text-purple-300">Rename Navigation Tabs</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.keys(tabNames).map(tabKey => (
+                      <div key={tabKey}>
+                        <label className="block text-[10px] font-bold text-purple-400 uppercase">{tabKey}</label>
+                        <input
+                          type="text"
+                          value={tabNames[tabKey]}
+                          onChange={e => setTabNames({ ...tabNames, [tabKey]: e.target.value })}
+                          className="w-full bg-[#0D0214] p-2 rounded-lg border border-purple-800 text-xs text-white"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* AUDIT LOG */}
+            {/* AUDIT LOG WITH CAMERA PHOTO PREVIEWS */}
             <div className="bg-[#1B0626] p-5 rounded-2xl border border-purple-800/80 space-y-3">
-              <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">📜 Real-Time Session Audit Log</h4>
-              <div className="space-y-2 max-h-36 overflow-y-auto">
+              <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: themeAccent }}>📜 Real-Time Session Audit Log</h4>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
                 {dispatchLogs.length === 0 ? (
                   <p className="text-xs text-purple-400">No dispatch actions recorded in this session.</p>
                 ) : (
                   dispatchLogs.map(log => (
-                    <div key={log.id} className="bg-[#0D0214] p-2 rounded-lg border border-purple-900 flex justify-between items-center text-xs">
-                      <div>
-                        <span className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10px] mr-2 ${log.type === 'OUT' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                          {log.type} ({log.qty})
-                        </span>
-                        <span className="text-white font-bold">{log.itemName}</span>
-                        <span className="text-purple-400 mx-2">➔</span>
-                        <span className="text-amber-300">{log.project}</span>
+                    <div key={log.id} className="bg-[#0D0214] p-2.5 rounded-lg border border-purple-900 flex justify-between items-center text-xs">
+                      <div className="flex items-center gap-2">
+                        {log.conditionPhoto && (
+                          <img src={log.conditionPhoto} className="w-8 h-8 rounded object-cover border border-amber-400" title="Condition Snap" />
+                        )}
+                        <div>
+                          <span className={`font-mono font-bold px-1.5 py-0.5 rounded text-[10px] mr-2 ${log.type === 'OUT' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                            {log.type} ({log.qty})
+                          </span>
+                          <span className="text-white font-bold">{log.itemName}</span>
+                          <span className="text-purple-400 mx-1.5">➔</span>
+                          <span className="text-amber-300">{log.project}</span>
+                        </div>
                       </div>
                       <span className="text-purple-400 text-[10px]">{log.timestamp} ({log.by})</span>
                     </div>
