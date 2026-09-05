@@ -147,25 +147,24 @@
           dbRef.current = database;
           setDbConnected(true);
 
-          // RealtimeListeners
-          database.ref('dm_portal_state').on('value', (snapshot) => {
+        // RealtimeListeners
+        database.ref('dm_portal_state').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-              if (data.inventory) setInventory(data.inventory);
-              if (data.workers) setWorkers(data.workers);
-              if (data.projects) setProjects(data.projects);
-              if (data.dispatchLogs) setDispatchLogs(data.dispatchLogs);
-              if (data.leaveRequests) setLeaveRequests(data.leaveRequests);
-              if (data.expenseRequests) setExpenseRequests(data.expenseRequests);
-              if (data.rolePins) setRolePins(data.rolePins);
-              if (data.roleTitles) setRoleTitles(data.roleTitles);
+                if (data.inventory) setInventory(data.inventory);
+                if (data.workers) setWorkers(data.workers);
+                if (data.projects) setProjects(data.projects);
+                if (data.dispatchLogs) setDispatchLogs(data.dispatchLogs);
+                if (data.leaveRequests) setLeaveRequests(data.leaveRequests);
+                if (data.expenseRequests) setExpenseRequests(data.expenseRequests);
+                if (data.rolePins) setRolePins(data.rolePins);
+                if (data.roleTitles) setRoleTitles(data.roleTitles);
+                if (data.appLogo) {
+                    setAppLogo(data.appLogo);
+                    localStorage.setItem('dm_app_logo_v10', JSON.stringify(data.appLogo));
+                }
             }
-          });
-        } catch (err) {
-          console.error("Firebase Connection Error:", err);
-          setDbConnected(false);
-        }
-      }, [firebaseConfigStr]);
+        });
 
       // Push state changes to cloud/local storage
       const pushStateUpdate = (key, val, localKey) => {
