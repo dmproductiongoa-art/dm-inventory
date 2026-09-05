@@ -133,6 +133,13 @@
     }
     setNewProject({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
   };
+      const handleDeleteEvent = (eventId) => {
+    const updatedProjects = projects.filter(p => p.id !== eventId);
+    setProjects(updatedProjects);
+    if (window.databaseRef) {
+        window.databaseRef.child('projects').set(updatedProjects);
+    }
+};
       
       // Initialize Realtime Cloud DB if configured
       useEffect(() => {
@@ -1027,11 +1034,19 @@
                           <p className="text-xs text-purple-400 font-mono">📅 Event Date: {p.eventDate}</p>
                         </div>
                         {canManageCatalog && (
-                          <div className="pt-2 text-right border-t border-purple-900/40">
-                            <button onClick={() => setEditingEvent(p)} className="px-3 py-1 bg-purple-900 hover:bg-purple-800 text-emerald-300 rounded-lg font-bold text-[11px] border border-purple-700">
-                              ✏️ Edit Event
-                            </button>
-                          </div>
+                          <div className="pt-2 flex justify-between items-center border-t border-purple-900/40">
+                              <button 
+                                  onClick={() => handleDeleteEvent(p.id)} 
+                                  className="px-3 py-1 bg-red-900/40 hover:bg-red-900 text-red-300 text-xs font-bold rounded">
+                                  Delete
+                              </button>
+                              <button 
+                                  onClick={() => setEditingEvent(p)} 
+                                  className="px-3 py-1 bg-purple-900 hover:bg-purple-800 text-emerald-400 text-xs font-bold rounded">
+                                  ✏️ Edit Event
+                              </button>
+                            </div>
+                          )}
                         )}
                       </div>
                     ))}
