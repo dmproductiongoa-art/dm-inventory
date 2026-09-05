@@ -104,6 +104,7 @@
       // Modal & Editing States
       const [inspectItem, setInspectItem] = useState(null);
       const [editingItem, setEditingItem] = useState(null);
+      const [editingEvent, setEditingEvent] = useState(null);
       const [newItem, setNewItem] = useState({ name: '', category: 'Staging & Trusses', total: 10, unit: 'Pcs', rackLocation: '', condition: 'New', images: [] });
       const [newWorker, setNewWorker] = useState({ name: '', type: 'Inhouse', role: 'Stage Crew', sitePresence: 'In Warehouse', dailyWage: 800 });
       const [newProject, setNewProject] = useState({ clientName: '', location: '', eventDate: '', status: 'Upcoming' });
