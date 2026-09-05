@@ -143,6 +143,7 @@
             firebase.initializeApp(config);
           }
           const database = firebase.database();
+          window.databaseRef = database;
           dbRef.current = database;
           setDbConnected(true);
 
