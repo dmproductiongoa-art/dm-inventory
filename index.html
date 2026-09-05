@@ -933,40 +933,72 @@
             )}
 
             {/* TAB: EVENTS & SITES */}
-{activeTab === 'projects' && (
-  {canManageCatalog && (
-              <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
-                <h3 className="text-base font-bold text-emerald-400">➕ Add New Event / Target Site</h3>
-                <form onSubmit={handleAddNewProject} className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Client Name</label>
-                    <input type="text" placeholder="e.g. Acme Corp Gala" value={newProject.clientName} onChange={e => setNewProject({ ...newProject, clientName: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+            {activeTab === 'projects' && (
+              <div className="space-y-5">
+                {canManageCatalog && (
+                  <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                    <h3 className="text-base font-bold text-emerald-400">➕ Add New Event / Target Site</h3>
+                    <form onSubmit={handleAddNewProject} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Client Name</label>
+                        <input type="text" placeholder="e.g. Acme Corp Gala" value={newProject.clientName} onChange={e => setNewProject({ ...newProject, clientName: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Location</label>
+                        <input type="text" placeholder="e.g. Grand Ballroom" value={newProject.location} onChange={e => setNewProject({ ...newProject, location: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Event Date</label>
+                        <input type="text" placeholder="YYYY-MM-DD" value={newProject.eventDate} onChange={e => setNewProject({ ...newProject, eventDate: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Status</label>
+                        <select value={newProject.status} onChange={e => setNewProject({ ...newProject, status: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold">
+                          <option value="Upcoming">Upcoming</option>
+                          <option value="Ongoing">Ongoing</option>
+                          <option value="Completed">Completed</option>
+                        </select>
+                      </div>
+                      <div className="md:col-span-4">
+                        <button type="submit" className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs rounded-xl transition uppercase">
+                          Add New Event
+                        </button>
+                      </div>
+                    </form>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Location</label>
-                    <input type="text" placeholder="e.g. Grand Ballroom" value={newProject.location} onChange={e => setNewProject({ ...newProject, location: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                )}
+
+                {/* Event Editor Form with Safe Fallbacks */}
+                {canManageCatalog && editingEvent && (
+                  <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
+                    <div className="flex justify-between items-center border-b border-purple-900/80 pb-3">
+                      <h3 className="text-base font-bold text-emerald-400">Edit Event: {editingEvent.clientName || 'Event'}</h3>
+                      <button onClick={() => setEditingEvent(null)} className="px-3 py-1 bg-purple-900 text-purple-200 text-xs font-bold rounded-lg">Cancel</button>
+                    </div>
+                    <form onSubmit={handleSaveEvent} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Client Name</label>
+                        <input type="text" value={editingEvent.clientName || ''} onChange={e => setEditingEvent({ ...editingEvent, clientName: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Location</label>
+                        <input type="text" value={editingEvent.location || ''} onChange={e => setEditingEvent({ ...editingEvent, location: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Event Date</label>
+                        <input type="text" value={editingEvent.eventDate || ''} onChange={e => setEditingEvent({ ...editingEvent, eventDate: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                      </div>
+                      <div className="md:col-span-3">
+                        <button type="submit" className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl transition uppercase">
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Event Date</label>
-                    <input type="text" placeholder="YYYY-MM-DD" value={newProject.eventDate} onChange={e => setNewProject({ ...newProject, eventDate: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-purple-300 uppercase mb-1">Status</label>
-                    <select value={newProject.status} onChange={e => setNewProject({ ...newProject, status: e.target.value })} className="w-full bg-[#0D0214] text-white border border-purple-800 rounded-xl px-3 py-2 text-xs font-bold">
-                      <option value="Upcoming">Upcoming</option>
-                      <option value="Ongoing">Ongoing</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-4">
-                    <button type="submit" className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs rounded-xl transition uppercase">
-                      Add New Event
-                    </button>
-                  </div>
-                </form>
+                )}
               </div>
             )}
-  <div className="space-y-5">
+
     {/* Event Editor Form with Safe Fallbacks */}
     {canManageCatalog && editingEvent && (
       <div className="bg-[#1B0626] p-6 rounded-2xl border border-purple-800/80 space-y-4">
