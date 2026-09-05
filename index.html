@@ -213,15 +213,19 @@
       const handleLogoUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setAppLogo(reader.result);
-            localStorage.setItem('dm_app_logo_v10', reader.result);
-          };
-          reader.readAsDataURL(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64Logo = reader.result;
+                setAppLogo(base64Logo);
+                localStorage.setItem('dm_app_logo_v10', base64Logo);
+                if (window.databaseRef) {
+                    window.databaseRef.child('appLogo').set(base64Logo);
+                }
+            };
+            reader.readAsDataURL(file);
         }
-      };
-
+    };
+      
       const handleWatermarkImageUpload = (file, callback) => {
         if (!file) return;
         const reader = new FileReader();
